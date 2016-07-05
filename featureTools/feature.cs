@@ -46,7 +46,7 @@ namespace featureTools
         /// <param name="ActiveView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        private static IFeatureCursor selectedFeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion){
+        public static IFeatureCursor selectedFeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion){
             try{
                 IMap map = ActiveView.FocusMap;
                 ILayer layer = returnLayerByName(null, layerName, ActiveView, ActiveView.FocusMap);
