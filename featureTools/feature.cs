@@ -46,7 +46,7 @@ namespace featureTools
         /// <param name="ActiveView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        public static IFeatureCursor selectedFeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion){
+        private static IFeatureCursor selectedFeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion){
             try{
                 IMap map = ActiveView.FocusMap;
                 ILayer layer = returnLayerByName(null, layerName, ActiveView, ActiveView.FocusMap);
@@ -221,6 +221,8 @@ namespace featureTools
         /// <param name="layer">Nombre del layer a buscar.</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
         /// <returns>Devuelve un ILayer.</returns>
+        /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <param name="pMap"> Mapa activado.</param>
         public static ILayer returnLayerByName(IMxDocument pMxDoc, string layer, IActiveView activeView = null, IMap pMap=null)
         {
             if (pMap ==null)
@@ -436,9 +438,39 @@ namespace featureTools
             IMap pMap = pMxDoc.FocusMap;
             pMap.ClearSelection();
         }
+        /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>        
+        /// <param name="pElementofPolygon">Nombre de la capa</param>
+        public static IPolyline createPolylineFromPolygon( IGeometry pElementofPolygon)
+        {
+            try
+            {
+            IPolyline pPolyline = default(IPolyline);
+            IPolygon tmp = (IPolygon)pElementofPolygon;
+            pPolyline = (IPolyline)polygonToPolyline(tmp);
+            return pPolyline;} catch (System.Exception ex) {
+                throw ex;
+            }
+         }
+        private static IGeometryCollection polygonToPolyline(IPolygon pPolygon)
+        {try {
+            IGeometryCollection polygonToPolyline = new PolylineClass();
+            IClone pClone;
+            IGeometryCollection pGeoms_Polygon;
+            ISegmentCollection pSegs_Path;
+            pClone = (IClone)pPolygon;
+            pGeoms_Polygon = (IGeometryCollection)pClone.Clone();
+            for (int i = 0; pGeoms_Polygon.GeometryCount < i; i++) {
+                pSegs_Path = new PathClass();
+                pSegs_Path.AddSegmentCollection((ISegmentCollection)pGeoms_Polygon.get_Geometry(i));
+                polygonToPolyline.AddGeometry((IGeometry)pSegs_Path);
+            }
+            return polygonToPolyline;} catch (System.Exception ex) {
+                throw ex;
+            }
+        }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
-        /// <param name="capa">Nombre de la capa</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="capa">Nombre de la capa</param>
         public static void zoomToSeleccion(IMxDocument pMxDoc, string capa)
         {
             ILayer pLayer = default(ILayer);

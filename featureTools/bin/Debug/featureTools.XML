@@ -174,10 +174,14 @@
             <summary>Remueve la selección de todos los elementos</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
         </member>
+        <member name="M:featureTools.feature.createPolylineFromPolygon(ESRI.ArcGIS.Geometry.IGeometry)">
+            <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>        
+            <param name="pElementofPolygon">Nombre de la capa</param>
+        </member>
         <member name="M:featureTools.feature.zoomToSeleccion(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
             <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
-            <param name="capa">Nombre de la capa</param>
             <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="capa">Nombre de la capa</param>
         </member>
         <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String)">
             <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
