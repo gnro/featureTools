@@ -440,31 +440,30 @@ namespace featureTools
         }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>        
         /// <param name="pElementofPolygon">Nombre de la capa</param>
-        public static IPolyline createPolylineFromPolygon( IGeometry pElementofPolygon)
-        {
-            try
-            {
-            IPolyline pPolyline = default(IPolyline);
-            IPolygon tmp = (IPolygon)pElementofPolygon;
-            pPolyline = (IPolyline)polygonToPolyline(tmp);
-            return pPolyline;} catch (System.Exception ex) {
+        public static IPolyline createPolylineFromPolygon( IGeometry pElementofPolygon){
+            try{
+                IPolyline pPolyline = default(IPolyline);
+                IPolygon tmp = (IPolygon)pElementofPolygon;
+                pPolyline = (IPolyline)polygonToPolyline(tmp);
+                return pPolyline;
+            } catch (System.Exception ex) {
                 throw ex;
             }
          }
-        private static IGeometryCollection polygonToPolyline(IPolygon pPolygon)
-        {try {
-            IGeometryCollection polygonToPolyline = new PolylineClass();
-            IClone pClone;
-            IGeometryCollection pGeoms_Polygon;
-            ISegmentCollection pSegs_Path;
-            pClone = (IClone)pPolygon;
-            pGeoms_Polygon = (IGeometryCollection)pClone.Clone();
-            for (int i = 0; pGeoms_Polygon.GeometryCount < i; i++) {
-                pSegs_Path = new PathClass();
-                pSegs_Path.AddSegmentCollection((ISegmentCollection)pGeoms_Polygon.get_Geometry(i));
-                polygonToPolyline.AddGeometry((IGeometry)pSegs_Path);
-            }
-            return polygonToPolyline;} catch (System.Exception ex) {
+        private static IGeometryCollection polygonToPolyline(IPolygon pPolygon) {
+            try {
+                IGeometryCollection polygonToPolyline = new PolylineClass();
+                IClone pClone;
+                IGeometryCollection pGeoms_Polygon;
+                ISegmentCollection pSegs_Path;
+                pClone = (IClone)pPolygon;
+                pGeoms_Polygon = (IGeometryCollection)pClone.Clone();
+                for (int i = 0;i < pGeoms_Polygon.GeometryCount; i++) {
+                    pSegs_Path = new PathClass() as ISegmentCollection;
+                    pSegs_Path.AddSegmentCollection((ISegmentCollection)pGeoms_Polygon.get_Geometry(i));
+                    polygonToPolyline.AddGeometry((IGeometry)pSegs_Path);
+                }
+                return polygonToPolyline;} catch (System.Exception ex) {
                 throw ex;
             }
         }

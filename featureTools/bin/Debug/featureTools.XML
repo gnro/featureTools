@@ -108,6 +108,8 @@
             <param name="layer">Nombre del layer a buscar.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
             <returns>Devuelve un ILayer.</returns>
+            <param name="ActiveView"> Visualizacion activa.</param>
+            <param name="pMap"> Mapa activado.</param>
         </member>
         <member name="M:featureTools.feature.returnFeatureLayerByName(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
             <summary>Retorna un IFeatureLayer2 en base al nombre</summary>
