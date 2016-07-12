@@ -6,7 +6,6 @@ C:\programacion\featureTools\featureTools\featureTools\obj\Debug\featureTools.dl
 C:\programacion\featureTools\featureTools\featureTools\obj\Debug\featureTools.pdb
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\bin\Debug\featureTools.dll
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\bin\Debug\featureTools.pdb
-C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.csprojResolveAssemblyReference.cache
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.dll
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.pdb
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\bin\Debug\featureTools.XML
