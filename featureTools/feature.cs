@@ -25,7 +25,8 @@ namespace featureTools
         /// <param name="ActiveView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        private static IFeature selectedfeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        /// <returns>Retorna un IFeature.</returns>
+        public static IFeature selectedfeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
             IFeatureCursor featureCursor = selectedFeature(layerName, ActiveView, envelope, eltiporelacion);
             IFeature feature = featureCursor.NextFeature();
@@ -37,19 +38,22 @@ namespace featureTools
         /// <param name="ActiveView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
+        /// <returns>Retorna un IFeatureCursor.</returns>
         public static IFeatureCursor selectedfeatures(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
             return selectedFeature(layerName, ActiveView, envelope, eltiporelacion);
         }
         /// <summary> Retorna un IFeatureCursor </summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        public static IFeatureCursor selectedFeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion){
+        /// <returns>Retorna un IFeatureCursor.</returns>
+        private static IFeatureCursor selectedFeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        {
             try{
-                IMap map = ActiveView.FocusMap;
-                ILayer layer = returnLayerByName(null, layerName, ActiveView, ActiveView.FocusMap);
+                IMap map = activeView.FocusMap;
+                ILayer layer = returnLayerByName(null, layerName, activeView, activeView.FocusMap);
                 IFeatureLayer pFeatureLayer = (IFeatureLayer)layer;
                 IFeatureClass featureClass = pFeatureLayer.FeatureClass;
                 System.String shapeFieldName = featureClass.ShapeFieldName;
@@ -74,6 +78,7 @@ namespace featureTools
         /// <param name="y"> coordenada y.</param>
         /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un IEnvelope.</returns>
         public static IEnvelope selectByPoint(int x, int y, string lacapa, IActiveView ActiveView)
         {
             ESRI.ArcGIS.Display.IScreenDisplay screenDisplay = ActiveView.ScreenDisplay;
@@ -100,6 +105,7 @@ namespace featureTools
         /// <param name="x"> coordenada x.</param>
         /// <param name="y"> coordenada y.</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna una arreglo de doubles[2].</returns>
         public static double[] intToGeografic(int x, int y, IActiveView ActiveView)
         {
             ESRI.ArcGIS.Display.IScreenDisplay screenDisplay = ActiveView.ScreenDisplay;
@@ -114,6 +120,7 @@ namespace featureTools
         /// <param name="y"> coordenada y.</param>
         /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna una arreglo de doubles [2].</returns>
         public static double[] intToCentroide(int x, int y, string lacapa, IActiveView ActiveView)
         {
             IFeature myfeature = selectPoint(x, y, lacapa, ActiveView);
@@ -121,6 +128,7 @@ namespace featureTools
         }
         /// <summary> Retorna las coordenadas de un punto </summary>
         /// <param name="myfeature"> El IFeature del elemento a seleccionar</param>
+        /// <returns>Retorna una arreglo de doubles [2].</returns>
         public static double[] ifeatureCentroide(IFeature myfeature)
         {
             IPoint centerPoint = new ESRI.ArcGIS.Geometry.Point();
@@ -133,6 +141,7 @@ namespace featureTools
         /// <summary> Retorna las coordenadas de un punto geografico en pixeles</summary>
         /// <param name="mapPoint"> El IFeature del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un arreglo de enteros.</returns>
         public static int[] pointToMap(IPoint mapPoint, IActiveView ActiveView)
         {
             if (mapPoint == null || mapPoint.IsEmpty || ActiveView == null)
@@ -151,6 +160,7 @@ namespace featureTools
         /// <param name="y"> coordenada y.</param>
         /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un IFeature.</returns>
         public static IFeature selectPoint(int x, int y, string lacapa, IActiveView ActiveView)
         {
             IFeature myfeature;
@@ -164,6 +174,7 @@ namespace featureTools
         /// <param name="y"> coordenada y.</param>
         /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un IFeature.</returns>
         public static IFeature selectPolygon(int x, int y, string lacapa, IActiveView ActiveView)
         {
             IFeature myfeature;
@@ -177,6 +188,7 @@ namespace featureTools
         /// <param name="y"> coordenada y.</param>
         /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un IFeature.</returns>
         public static IFeature selectLine(int x, int y, string lacapa, IActiveView ActiveView)
         {
             IFeature myfeature;
@@ -220,6 +232,8 @@ namespace featureTools
         /// <summary>Retorna una layer en base al nombre</summary>
         /// <param name="layer">Nombre del layer a buscar.</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
+        /// <param name="pMap"> Mapa activado.</param>
         /// <returns>Devuelve un ILayer.</returns>
         public static ILayer returnLayerByName(IMxDocument pMxDoc, string layer, IActiveView activeView = null, IMap pMap=null)
         {
@@ -228,9 +242,7 @@ namespace featureTools
             if (activeView!=null)
                 pMap = activeView.FocusMap;
             IEnumLayer pLayers = pMap.Layers;
-            ILayer pLayer;
-            pLayers = pMap.Layers;
-            pLayer = pLayers.Next();
+            ILayer pLayer = pLayers.Next();
             while (!(pLayer == null)) {
                 if (pLayer.Name == layer)
                     return pLayer;
@@ -248,7 +260,6 @@ namespace featureTools
             IEnumLayer pLayers = pMap.Layers;
             ILayer pLayer = default(ILayer);
             IFeatureLayer2 pFL = default(IFeatureLayer2);
-            pLayers = pMap.Layers;
             pLayer = pLayers.Next();
             while (!(pLayer == null)){
                 if (pLayer is IFeatureLayer2)
@@ -259,6 +270,13 @@ namespace featureTools
                 pLayer = pLayers.Next();
             }
             return null;
+        }
+        /// <summary>Retorna un IFeatureClass en base al nombre</summary>
+        /// <param name="layer">Nombre del layer a buscar.</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <returns>Devuelve un IFeatureClass.</returns>
+        public static IFeatureClass returnFeatureClassByName(IMxDocument pMxDoc, string layer){
+            return  returnFeatureLayerByName(pMxDoc, layer).FeatureClass;
         }
         /// <summary>Retorna un ArrayList de los nombres en un Feature Class</summary>
         /// <param name="fc">FeatureClass a buscar.</param>
@@ -306,7 +324,6 @@ namespace featureTools
             ILayer pLayer = default(ILayer);
             IFeatureLayer2 pFLayer = default(IFeatureLayer2);
             ArrayList col = new ArrayList();
-            pLayers = pMap.Layers;
             pLayer = pLayers.Next();
             while (!(pLayer == null)) {
                 if (pLayer is IFeatureLayer) {
@@ -331,7 +348,6 @@ namespace featureTools
             ILayer pLayer = default(ILayer);
             IFeatureLayer2 pFLayer = default(IFeatureLayer2);
             List<string> col = new List<string>();
-            pLayers = pMap.Layers;
             pLayer = pLayers.Next();
             while (!(pLayer == null)){            
                 if (pLayer is IFeatureLayer)
@@ -401,7 +417,7 @@ namespace featureTools
         /// <param name="condicion">Condición para realizar la selección</param>
         /// <param name="Layer">Layer de origen de valores.</param>
         /// <param name="b">Indica si la seleccion se agrega a la existente</param>
-        /// <returns> Devuelve un entero.</returns>
+        /// <returns>Retorna un IFeatureSelection.</returns>
         public static IFeatureSelection seleccionByAttributeQuery(string condicion, ILayer Layer, bool b=false)
         {
             IQueryFilter pqueryfilter = default(IQueryFilter);
@@ -436,9 +452,39 @@ namespace featureTools
             IMap pMap = pMxDoc.FocusMap;
             pMap.ClearSelection();
         }
+        /// <summary>Realza la conversion de polygono a polilineas</summary>        
+        /// <param name="pElementofPolygon">Nombre de la capa</param>
+        /// <returns>Retorna un IPolyline.</returns>
+        public static IPolyline createPolylineFromPolygon( IGeometry pElementofPolygon){
+            try{
+                IPolyline pPolyline = default(IPolyline);
+                IPolygon tmp = (IPolygon)pElementofPolygon;
+                pPolyline = (IPolyline)polygonToPolyline(tmp);
+                return pPolyline;
+            } catch (System.Exception ex) {
+                throw ex;
+            }
+         }
+        private static IGeometryCollection polygonToPolyline(IPolygon pPolygon) {
+            try {
+                IGeometryCollection polygonToPolyline = new PolylineClass();
+                IClone pClone;
+                IGeometryCollection pGeoms_Polygon;
+                ISegmentCollection pSegs_Path;
+                pClone = (IClone)pPolygon;
+                pGeoms_Polygon = (IGeometryCollection)pClone.Clone();
+                for (int i = 0;i < pGeoms_Polygon.GeometryCount; i++) {
+                    pSegs_Path = new PathClass() as ISegmentCollection;
+                    pSegs_Path.AddSegmentCollection((ISegmentCollection)pGeoms_Polygon.get_Geometry(i));
+                    polygonToPolyline.AddGeometry((IGeometry)pSegs_Path);
+                }
+                return polygonToPolyline;} catch (System.Exception ex) {
+                throw ex;
+            }
+        }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
-        /// <param name="capa">Nombre de la capa</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="capa">Nombre de la capa</param>
         public static void zoomToSeleccion(IMxDocument pMxDoc, string capa)
         {
             ILayer pLayer = default(ILayer);
@@ -478,7 +524,6 @@ namespace featureTools
                 throw ex;
             }
         }
-
         /// <summary>Inicia edicion en un layer especifico</summary>
         /// <param name="m_mapControl">IMxDocument .FocusMap.</param>
         /// <param name="tipo">Opcion para la edicion</param>
@@ -510,11 +555,50 @@ namespace featureTools
                     break;
             }
         }
-
-    }
-    //private class objetos
-    //{
-    //    public string clave { get; set; }
-    //    public string valor { get; set; }
-    //}
+        /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
+        /// <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,tipo de valor,valor).</param>
+        /// <param name="pgeometry"> Visualizacion activa.</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="layer">Layer a editar</param>
+        /// <param name="fieldoptional">Campo opcional.</param>
+        /// <param name="valueoptional">Valor opcional.</param>
+        /// <returns>Retorna el fid de tipo entero.</returns>
+        public static int createFeature(string layerName, string[,] estructuraFeature, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer,string fieldoptional = null, int valueoptional = 0)
+        {try {
+            IFeatureClass pFeatureClass = returnFeatureClassByName(pMxDoc, layerName);
+            IActiveView activeView = pMxDoc.ActivatedView;
+            IFeature pFeature = pFeatureClass.CreateFeature();
+            pFeature.Shape = pgeometry;
+            for(int i =0;i<(estructuraFeature.Length/3);i++){//Se recorre el arrays y actualiza los valores
+                int contractorFieldIndex= pFeatureClass.FindField(estructuraFeature[i,0]);
+                switch (estructuraFeature[i,1]) {
+                    case "Int":
+                    case "Single":
+                        int pvalor= Int32.Parse(estructuraFeature[i,2]);
+                        pFeature.set_Value(contractorFieldIndex,pvalor);
+                        break;
+                    case "Str":
+                    case "string":
+                        pFeature.set_Value(contractorFieldIndex,estructuraFeature[i,2]);
+                        break;
+                        case "Date":
+                        if(estructuraFeature[i,2]=="hoy")
+                        pFeature.set_Value(contractorFieldIndex,DateTime.Today);
+                    break;
+                }
+            }
+            if (fieldoptional != null) {
+                int contractorFieldIndex = pFeatureClass.FindField(fieldoptional);
+                pFeature.set_Value(contractorFieldIndex, valueoptional);
+            }
+            pFeature.Store();
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
+            return pFeature.OID;
+            }catch (System.Exception ex)
+            {
+        return 0;
+                throw ex;
+            }
+        }
+   }
 }
