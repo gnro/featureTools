@@ -165,7 +165,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
-            envelope.Expand(500, 500, false);
+            envelope.Expand(0.05, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelContains);
             return myfeature;
         }
@@ -179,7 +179,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
-            envelope.Expand(0.5, 0.05, false);
+            envelope.Expand(0.05, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
