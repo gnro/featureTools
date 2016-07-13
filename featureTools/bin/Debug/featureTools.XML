@@ -214,14 +214,15 @@
             <param name="tipo">Opcion para la edicion</param>
             <param name="cLayer">Layer a editar</param>
         </member>
-        <member name="M:featureTools.feature.createFeature(System.String,System.String[0:,0:],ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.String,System.Int32)">
+        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer)">
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
+<<<<<<< HEAD
             <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,tipo de valor,valor).</param>
+=======
+>>>>>>> b67cae6708bd6924776a3b69768d78c5f4d228e7
             <param name="pgeometry"> Visualizacion activa.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="layer">Layer a editar</param>
-            <param name="fieldoptional">Campo opcional.</param>
-            <param name="valueoptional">Valor opcional.</param>
             <returns>Retorna el fid de tipo entero.</returns>
         </member>
     </members>

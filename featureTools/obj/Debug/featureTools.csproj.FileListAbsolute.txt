@@ -4,8 +4,12 @@ C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureToo
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.dll
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.pdb
 C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\bin\Debug\featureTools.XML
+<<<<<<< HEAD
 C:\programacion\featureTools\featureTools\featureTools\obj\Debug\featureTools.csprojResolveAssemblyReference.cache
 C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.XML
 C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.dll
 C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.pdb
 C:\programacion\featureTools\featureTools\featureTools\obj\Debug\featureTools.dll
+=======
+C:\Users\g.jimenez\Documents\Visual Studio 2010\Projects\featureTools\featureTools\obj\Debug\featureTools.csprojResolveAssemblyReference.cache
+>>>>>>> b67cae6708bd6924776a3b69768d78c5f4d228e7

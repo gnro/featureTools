@@ -556,47 +556,25 @@ namespace featureTools
             }
         }
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,tipo de valor,valor).</param>
         /// <param name="pgeometry"> Visualizacion activa.</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
         /// <param name="layer">Layer a editar</param>
-        /// <param name="fieldoptional">Campo opcional.</param>
-        /// <param name="valueoptional">Valor opcional.</param>
         /// <returns>Retorna el fid de tipo entero.</returns>
-        public static int createFeature(string layerName, string[,] estructuraFeature, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer,string fieldoptional = null, int valueoptional = 0)
-        {try {
-            IFeatureClass pFeatureClass = returnFeatureClassByName(pMxDoc, layerName);
-            IActiveView activeView = pMxDoc.ActivatedView;
-            IFeature pFeature = pFeatureClass.CreateFeature();
-            pFeature.Shape = pgeometry;
-            for(int i =0;i<(estructuraFeature.Length/3);i++){//Se recorre el arrays y actualiza los valores
-                int contractorFieldIndex= pFeatureClass.FindField(estructuraFeature[i,0]);
-                switch (estructuraFeature[i,1]) {
-                    case "Int":
-                    case "Single":
-                        int pvalor= Int32.Parse(estructuraFeature[i,2]);
-                        pFeature.set_Value(contractorFieldIndex,pvalor);
-                        break;
-                    case "Str":
-                    case "string":
-                        pFeature.set_Value(contractorFieldIndex,estructuraFeature[i,2]);
-                        break;
-                        case "Date":
-                        if(estructuraFeature[i,2]=="hoy")
-                        pFeature.set_Value(contractorFieldIndex,DateTime.Today);
-                    break;
-                }
-            }
-            if (fieldoptional != null) {
-                int contractorFieldIndex = pFeatureClass.FindField(fieldoptional);
-                pFeature.set_Value(contractorFieldIndex, valueoptional);
-            }
-            pFeature.Store();
-            activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
-            return pFeature.OID;
-            }catch (System.Exception ex)
+        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer)
+        {
+            try
             {
-        return 0;
+                IFeatureClass pFeatureClass = returnFeatureClassByName(pMxDoc, layerName);
+                IActiveView activeView = pMxDoc.ActivatedView;
+                IFeature pFeature = pFeatureClass.CreateFeature();
+                pFeature.Shape = pgeometry;
+                pFeature.Store();
+                activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
+                return pFeature.OID;
+            }
+            catch (System.Exception ex)
+            {
+                return 0;
                 throw ex;
             }
         }
