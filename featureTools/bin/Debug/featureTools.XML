@@ -216,7 +216,7 @@
         </member>
         <member name="M:featureTools.feature.createFeature(System.String,System.String[0:,0:],ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.String,System.Int32)">
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-            <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,valor,tipo de valor).</param>
+            <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,tipo de valor,valor).</param>
             <param name="pgeometry"> Visualizacion activa.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="layer">Layer a editar</param>
