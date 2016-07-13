@@ -25,7 +25,7 @@ namespace featureTools
         /// <param name="ActiveView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        public static IFeature selectedfeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        private static IFeature selectedfeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
             IFeatureCursor featureCursor = selectedFeature(layerName, ActiveView, envelope, eltiporelacion);
             IFeature feature = featureCursor.NextFeature();
@@ -155,7 +155,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
-            envelope.Expand(500, 500, false);
+            envelope.Expand(0.05, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelContains);
             return myfeature;
         }
@@ -168,7 +168,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
-            envelope.Expand(0.5, 0.05, false);
+            envelope.Expand(0.05, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
