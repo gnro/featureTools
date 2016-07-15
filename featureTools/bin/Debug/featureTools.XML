@@ -203,9 +203,9 @@
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
         </member>
-        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String)">
+        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IDocument,System.String)">
             <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
-            <param name="application">Entorno de arcmap</param>
+            <param name="application">Documento activo</param>
             <param name="commandName">Comando a ejecutar</param>
         </member>
         <member name="M:featureTools.feature.startEditing(ESRI.ArcGIS.Carto.IMap,System.String,ESRI.ArcGIS.Carto.ILayer)">
@@ -216,10 +216,6 @@
         </member>
         <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer)">
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-<<<<<<< HEAD
-            <param name="estructuraFeature">Datos de la nueva capa[,3](nombre del campo,tipo de valor,valor).</param>
-=======
->>>>>>> b67cae6708bd6924776a3b69768d78c5f4d228e7
             <param name="pgeometry"> Visualizacion activa.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="layer">Layer a editar</param>

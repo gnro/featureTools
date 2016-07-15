@@ -165,8 +165,8 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
-            envelope.Expand(0.05, 0.05, false);
-            myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelContains);
+            envelope.Expand(0.1, 0.1, false);
+            myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
         /// <summary> Permiete seleccionar un elemento de tipo poligono </summary>
@@ -509,11 +509,11 @@ namespace featureTools
             }
         }
         /// <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
-        /// <param name="application">Entorno de arcmap</param>
+        /// <param name="application">Documento activo</param>
         /// <param name="commandName">Comando a ejecutar</param>
-        public static void FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication application, string commandName) {
+        public static void FindCommandAndExecute(ESRI.ArcGIS.Framework.IDocument document, string commandName) {
             try {
-                ESRI.ArcGIS.Framework.ICommandBars commandBars = application.Document.CommandBars;
+                ESRI.ArcGIS.Framework.ICommandBars commandBars = document.CommandBars;
                 ESRI.ArcGIS.esriSystem.UID uid = new ESRI.ArcGIS.esriSystem.UIDClass();
                 uid.Value = commandName; // Example: "esriFramework.HelpContentsCommand" or "{D74B2F25-AC90-11D2-87F8-0000F8751720}"
                 ESRI.ArcGIS.Framework.ICommandItem commandItem = commandBars.Find(uid, false, false);
