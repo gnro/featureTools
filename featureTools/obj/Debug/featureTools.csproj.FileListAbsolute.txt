@@ -1,4 +1,3 @@
-C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.XML
 C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.dll
 C:\programacion\featureTools\featureTools\featureTools\bin\Debug\featureTools.pdb
 C:\programacion\featureTools\featureTools\featureTools\obj\Debug\featureTools.dll
