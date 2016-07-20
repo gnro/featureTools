@@ -22,26 +22,26 @@ namespace featureTools
     {
         /// <summary> Retorna un IFeatureCursor en base a un nombre de layer</summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
         /// <returns>Retorna un IFeature.</returns>
-        public static IFeature selectedfeature(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        public static IFeature selectedfeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
-            IFeatureCursor featureCursor = selectedFeature(layerName, ActiveView, envelope, eltiporelacion);
+            IFeatureCursor featureCursor = selectedFeature(layerName, activeView, envelope, eltiporelacion);
             IFeature feature = featureCursor.NextFeature();
-            ActiveView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
             return feature;
         }
         /// <summary> Retorna un IFeatureCursor </summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
         /// <returns>Retorna un IFeatureCursor.</returns>
-        public static IFeatureCursor selectedfeatures(string layerName, IActiveView ActiveView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        public static IFeatureCursor selectedfeatures(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
-            return selectedFeature(layerName, ActiveView, envelope, eltiporelacion);
+            return selectedFeature(layerName, activeView, envelope, eltiporelacion);
         }
         /// <summary> Retorna un IFeatureCursor </summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
@@ -165,7 +165,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
-            envelope.Expand(0.05, 0.05, false);
+            envelope.Expand(500, 500, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelContains);
             return myfeature;
         }
@@ -179,7 +179,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
-            envelope.Expand(0.05, 0.05, false);
+            envelope.Expand(0.5, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
@@ -417,20 +417,23 @@ namespace featureTools
         /// <param name="condicion">Condición para realizar la selección</param>
         /// <param name="Layer">Layer de origen de valores.</param>
         /// <param name="b">Indica si la seleccion se agrega a la existente</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
         /// <returns>Retorna un IFeatureSelection.</returns>
-        public static IFeatureSelection seleccionByAttributeQuery(string condicion, ILayer Layer, bool b=false)
+        public static IFeatureSelection seleccionByAttributeQuery(string condicion, ILayer Layer, bool b=false,IActiveView activeView=null)
         {
-            IQueryFilter pqueryfilter = default(IQueryFilter);
-            IFeatureLayer pfLayer;
+            IQueryFilter queryFilter = new QueryFilter();
+            IFeatureLayer pfLayer= (IFeatureLayer)Layer;
             try {
-                pqueryfilter = new QueryFilter();
-                pfLayer = (IFeatureLayer)Layer;
-                pqueryfilter.WhereClause = condicion;
+                queryFilter.WhereClause = condicion;
                 ESRI.ArcGIS.Carto.IFeatureSelection featureSelection = pfLayer as ESRI.ArcGIS.Carto.IFeatureSelection;
+              /*  if (activeView != null)
+                    activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);*/
                 if (b)
-                    featureSelection.SelectFeatures(pqueryfilter, ESRI.ArcGIS.Carto.esriSelectionResultEnum.esriSelectionResultAdd, false);
+                    featureSelection.SelectFeatures(queryFilter, ESRI.ArcGIS.Carto.esriSelectionResultEnum.esriSelectionResultAdd, false);
                 else
-                    featureSelection.SelectFeatures(pqueryfilter, ESRI.ArcGIS.Carto.esriSelectionResultEnum.esriSelectionResultNew, false);
+                    featureSelection.SelectFeatures(queryFilter, ESRI.ArcGIS.Carto.esriSelectionResultEnum.esriSelectionResultNew, false);
+                if (activeView != null)
+                    activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
                 return Layer as IFeatureSelection;
             }
             catch (System.Exception ex){
@@ -528,8 +531,9 @@ namespace featureTools
         /// <param name="m_mapControl">IMxDocument .FocusMap.</param>
         /// <param name="tipo">Opcion para la edicion</param>
         /// <param name="cLayer">Layer a editar</param>
-        public static void startEditing(IMap m_mapControl, String tipo, ILayer cLayer)
-        {
+        public static void startEditing(IMap m_mapControl, String tipo, ILayer cLayer){        
+            try
+            {
             IEngineEditor m_engineEditor = new EngineEditorClass();
             switch (tipo) {
                 case "Terminar Guardando":
@@ -554,13 +558,19 @@ namespace featureTools
                     if (m_engineEditor.EditState != esriEngineEditState.esriEngineStateNotEditing) m_engineEditor.StopEditing(true);
                     break;
             }
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "startEditing");
+            }
         }
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
         /// <param name="pgeometry"> Visualizacion activa.</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
         /// <param name="layer">Layer a editar</param>
+        /// <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
         /// <returns>Retorna el fid de tipo entero.</returns>
-        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer)
+        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer, System.Object elObjeto=null)
         {
             try
             {
@@ -568,15 +578,47 @@ namespace featureTools
                 IActiveView activeView = pMxDoc.ActivatedView;
                 IFeature pFeature = pFeatureClass.CreateFeature();
                 pFeature.Shape = pgeometry;
+                if(elObjeto != null)
+                    insertDato(pFeatureClass,ref pFeature, elObjeto);
                 pFeature.Store();
                 activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
                 return pFeature.OID;
             }
             catch (System.Exception ex)
             {
-                return 0;
-                throw ex;
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "createFeature");
+                return -1;
             }
+        }
+       
+        private static void insertDato(IFeatureClass pFeatureClass, ref IFeature pFeature, System.Object elObjeto) {
+                foreach (var prop in elObjeto.GetType().GetProperties()) {//Se recorre el arrays y actualiza los valores
+                    int contractorFieldIndex = pFeatureClass.FindField(prop.Name);
+                    if (contractorFieldIndex >= 0)
+                        switch (prop.PropertyType.ToString().Substring(7, prop.PropertyType.ToString().Length - 7)){
+                            case "double":
+                            case "Double":
+                                double dvalor = double.Parse(prop.GetValue(elObjeto, null).ToString());
+                                pFeature.set_Value(contractorFieldIndex, dvalor);
+                                break;
+                            case "Int":
+                            case "Single":
+                            case "Int16":
+                            case "Int32":
+                                int pvalor = Int32.Parse(prop.GetValue(elObjeto, null).ToString());
+                                pFeature.set_Value(contractorFieldIndex, pvalor);
+                                break;
+                            case "Str":
+                            case "string":
+                            case "String":
+                                pFeature.set_Value(contractorFieldIndex, prop.GetValue(elObjeto, null).ToString());
+                                break;
+                            case "Date":
+                                if (prop.GetValue(elObjeto, null).ToString() == "hoy")
+                                    pFeature.set_Value(contractorFieldIndex, DateTime.Today);
+                                break;
+                        }
+                }
         }
    }
 }
