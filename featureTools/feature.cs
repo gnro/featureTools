@@ -708,5 +708,63 @@ namespace featureTools
         {
             
         }
+        /*public void loadObjects(String output, String input, String outputFeatureClassName, String inputFeatureClassName)
+{
+    //Set up the output feature classes, i.e. the destination
+    IWorkspaceFactory outputWorkspaceFactory = new AccessWorkspaceFactoryClass();
+
+    IFeatureWorkspace outputFeatureWorkspace = outputWorkspaceFactory.OpenFromFile(output, 0) as IFeatureWorkspace;
+    IFeatureClass outputFeatureClass = outputFeatureWorkspace.OpenFeatureClass(outputFeatureClassName);
+    // Set up the input feature classe, i.e. the data source
+    IWorkspaceFactory inFeatureWorkspaceFactory = new AccessWorkspaceFactoryClass();
+    IFeatureWorkspace inFeatureWorkspace = inFeatureWorkspaceFactory.OpenFromFile(input, 0) as IFeatureWorkspace;
+    IFeatureClass inFeatureClass = inFeatureWorkspace.OpenFeatureClass(inputFeatureClassName);
+    // Specify a subset of the input data
+    IQueryFilter queryFilter = new QueryFilterClass();
+    queryFilter.SubFields = "SHAPE,STATE_NAME,STATE_FIPS,AREA";
+    queryFilter.WhereClause = "STATE_NAME = 'California' OR STATE_NAME = 'Oregon'";
+
+    //OutputFields parameter needs to match sub-fields in input queryfilter
+    IFields allFields = outputFeatureClass.Fields;
+    IFields outFields = new FieldsClass();
+    IFieldsEdit outFieldsEdit = outFields as IFieldsEdit;
+    // Get the query filter sub-fields as an array
+    // and loop through each field in turn,
+    // adding it to the ouput fields
+    String[] subFields = (queryFilter.SubFields).Split(',');
+    for(int j = 0; j < subFields.Length; j++)
+    {
+        int fieldID = allFields.FindField(subFields[j]);
+        if(fieldID == -1)
+        {
+            System.Windows.Forms.MessageBox.Show("field not found: " +  subFields[j]);
+            return;
+        }
+        outFieldsEdit.AddField(allFields.get_Field(fieldID));
+    }
+
+    IObjectLoader objectLoader = new ObjectLoaderClass();
+    IEnumInvalidObject invalidObjectEnum;
+    objectLoader.LoadObjects(
+        null,
+        (ITable)inFeatureClass,
+        queryFilter,
+        (ITable)outputFeatureClass,
+        outFields,
+        false,
+        0,
+        false,
+        false,
+        10,
+        out invalidObjectEnum
+    );
+       
+              
+    IInvalidObjectInfo invalidObject = invalidObjectEnum.Next();
+    if(invalidObject != null)
+    {
+        System.Windows.Forms.MessageBox.Show("Some or all features did not load");
+    }
+}*/
     }
 }
