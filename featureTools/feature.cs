@@ -1,4 +1,4 @@
-﻿using System;
+﻿//using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,10 @@ using System.Windows.Forms;
 using ESRI.ArcGIS.Framework;
 using ESRI.ArcGIS.Editor;
 using ESRI.ArcGIS.Controls;
-
+using System;
+using System.Data;
+using ESRI.ArcGIS.DataSourcesGDB;
+using ESRI.ArcGIS.EditorExt;
 
 namespace featureTools
 {
@@ -20,18 +23,107 @@ namespace featureTools
     /// <remarks>Realiza operaciones de consulta y cambio de propiedades de las capas en ArcMap</remarks>
     public class feature
     {
-        /// <summary> Retorna un IFeatureCursor en base a un nombre de layer</summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="activeView"> Visualizacion activa.</param>
-        /// <param name="envelope"> IEnvelope.</param>
-        /// <param name="eltiporelacion"> El tipo de relacion.</param>
-        /// <returns>Retorna un IFeature.</returns>
-        public static IFeature selectedfeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        /// <param name="pgeometry"> Visualizacion activa.</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="layer">Layer a editar</param>
+        /// <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+        /// <returns>Retorna el fid de tipo entero.</returns>
+        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer, System.Object elObjeto=null)
         {
-            IFeatureCursor featureCursor = selectedFeature(layerName, activeView, envelope, eltiporelacion);
-            IFeature feature = featureCursor.NextFeature();
-            activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
-            return feature;
+            try
+            {
+                IFeatureClass pFeatureClass = returnFeatureClassByName(pMxDoc, layerName);
+                IActiveView activeView = pMxDoc.ActivatedView;
+                IFeature pFeature = pFeatureClass.CreateFeature();
+                pFeature.Shape = pgeometry;
+                if(elObjeto != null)
+                    insertDato(pFeatureClass,ref pFeature, elObjeto);
+                pFeature.Store();
+                activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
+                return pFeature.OID;
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "createFeature");
+                return -1;
+            }
+        }
+        /// <summary>Retorna el número de elementos seleccionados según una condición</summary>
+        /// <param name="condicion">Condición para realizar la selección</param>
+        /// <param name="Layer">Layer de origen de valores.</param>
+        /// <returns> Devuelve un entero.</returns>
+        public static int cuentaSeleccion(string condicion, ILayer Layer)
+        {
+            ISelectionSet pSelSet;
+            try {
+                pSelSet = seleccionByAttributeQuery(condicion, Layer).SelectionSet;
+                return pSelSet.Count;
+            }
+            catch (System.Exception ex) {
+                throw ex;
+            }
+        }
+        /// <summary>Retorna un true o false en base a la existencia del nombre del layer</summary>
+        /// <param name="layer">Nombre del layer a buscar.</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <returns>Devuelve boolean.</returns>
+        public static bool existeono(IMxDocument pMxDoc, string layer)
+        {
+            ILayer capa = returnLayerByName(pMxDoc, layer);
+            if (capa == null)
+                return false;
+            else
+                return true;
+        }
+        /// <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
+        /// <param name="application">Entorno de arcmap</param>
+        /// <param name="commandName">Comando a ejecutar</param>
+        public static void FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication application, string commandName) {
+            try {
+                ESRI.ArcGIS.Framework.ICommandBars commandBars = application.Document.CommandBars;
+                ESRI.ArcGIS.esriSystem.UID uid = new ESRI.ArcGIS.esriSystem.UIDClass();
+                uid.Value = commandName; // Example: "esriFramework.HelpContentsCommand" or "{D74B2F25-AC90-11D2-87F8-0000F8751720}"
+                ESRI.ArcGIS.Framework.ICommandItem commandItem = commandBars.Find(uid, false, false);
+                if (commandItem != null)
+                 commandItem.Execute();
+            }catch (System.Exception ex)
+            {
+                throw ex;
+            }
+        }
+        /// <summary>Retorna un IGroupLayer en base al nombre</summary>
+        /// <param name="layer">Nombre del layer o grupo a buscar</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <returns>Devuelve un IGroupLayer.</returns>
+        protected static IGroupLayer getGrpLayerByName(IMxDocument pMxDoc, string layer)
+        {
+            IMap pMap = pMxDoc.FocusMap;
+            IEnumLayer pLayers = pMap.Layers;
+            ILayer pLayer;
+            IGroupLayer pGroupLayer;
+            pGroupLayer = null;
+            pMap = pMxDoc.FocusMap;
+            pLayers = pMap.Layers;
+            for (int i = 0; i < pMap.LayerCount; i++)
+                if (pMap.get_Layer(i).Name == layer) {
+                    pLayer = pMap.get_Layer(i);
+                    if (pLayer is IGroupLayer) {
+                        pGroupLayer = (IGroupLayer)pLayer;
+                        return pGroupLayer;
+                    }
+                }
+            return pGroupLayer;
+        }
+        /// <summary> Cambia la propiedad de visibilidad / enciende o apaga de un grupo de capas </summary>
+        /// <param name="nomGroupLayer">Nombre del Grouplayer a buscar.</param>
+        /// <param name="bandera">Valor booleano de visible</param>
+        /// <param name="pMxDoc"> ArcMap.Document.</param>
+        public static void groupLayerVisible(IMxDocument pMxDoc, string nomGroupLayer, bool bandera)
+        {
+            IGroupLayer pLayer = default(IGroupLayer);
+            pLayer = getGrpLayerByName(pMxDoc, nomGroupLayer);
+            pLayer.Visible = bandera;
         }
         /// <summary> Retorna un IFeatureCursor </summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
@@ -41,7 +133,7 @@ namespace featureTools
         /// <returns>Retorna un IFeatureCursor.</returns>
         public static IFeatureCursor selectedfeatures(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
-            return selectedFeature(layerName, activeView, envelope, eltiporelacion);
+            return selectedFeatureCursor(layerName, activeView, envelope, eltiporelacion);
         }
         /// <summary> Retorna un IFeatureCursor </summary>
         /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
@@ -49,10 +141,10 @@ namespace featureTools
         /// <param name="envelope"> IEnvelope.</param>
         /// <param name="eltiporelacion"> El tipo de relacion.</param>
         /// <returns>Retorna un IFeatureCursor.</returns>
-        private static IFeatureCursor selectedFeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        private static IFeatureCursor selectedFeatureCursor(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
             try{
-                IMap map = activeView.FocusMap;
+                IMap pMap = activeView.FocusMap;
                 ILayer layer = returnLayerByName(null, layerName, activeView, activeView.FocusMap);
                 IFeatureLayer pFeatureLayer = (IFeatureLayer)layer;
                 IFeatureClass featureClass = pFeatureLayer.FeatureClass;
@@ -62,7 +154,7 @@ namespace featureTools
                 spatialFilter.Geometry = envelope;
                 spatialFilter.SpatialRel = (esriSpatialRelEnum)eltiporelacion;
                 //spatialFilter.OutputSpatialReference(shapeFieldName) = map.SpatialReference;
-                spatialFilter.set_OutputSpatialReference(shapeFieldName, map.SpatialReference);
+                spatialFilter.set_OutputSpatialReference(shapeFieldName, pMap.SpatialReference);
                 spatialFilter.GeometryField = shapeFieldName;
                 IFeatureCursor featureCursor = featureClass.Search(spatialFilter, false);
                 //  activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
@@ -72,21 +164,6 @@ namespace featureTools
             {
                 throw ex;
            }
-        }
-        /// <summary> Permiete seleccionar un elemento por un par de coordenas X,Y</summary>
-        /// <param name="x"> coordenada x.</param>
-        /// <param name="y"> coordenada y.</param>
-        /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
-        /// <param name="ActiveView"> Visualizacion activa.</param>
-        /// <returns>Retorna un IEnvelope.</returns>
-        public static IEnvelope selectByPoint(int x, int y, string lacapa, IActiveView ActiveView)
-        {
-            ESRI.ArcGIS.Display.IScreenDisplay screenDisplay = ActiveView.ScreenDisplay;
-            ESRI.ArcGIS.Display.IDisplayTransformation displayTransformation = screenDisplay.DisplayTransformation;
-            ESRI.ArcGIS.Geometry.Point pnt = new ESRI.ArcGIS.Geometry.Point();
-            pnt = (Point)displayTransformation.ToMapPoint(x, y);
-            IEnvelope envelope = pnt.Envelope;
-            return envelope;
         }
         /// <summary> Permiete seleccionar un elemento por un par de coordenas X,Y</summary>
         /// <param name="x"> coordenada x.</param>
@@ -167,6 +244,7 @@ namespace featureTools
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
             envelope.Expand(0.1, 0.1, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
+            ActiveView.Refresh();
             return myfeature;
         }
         /// <summary> Permiete seleccionar un elemento de tipo poligono </summary>
@@ -179,7 +257,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
-            //envelope.Expand(0.05, 0.05, false);
+            envelope.Expand(0.05, 0.05, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
@@ -197,6 +275,19 @@ namespace featureTools
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelIntersects);
             return myfeature;
         }
+        /// <summary> Retorna un IFeatureCursor en base a un nombre de layer</summary>
+        /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
+        /// <param name="activeView"> Visualizacion activa.</param>
+        /// <param name="envelope"> IEnvelope.</param>
+        /// <param name="eltiporelacion"> El tipo de relacion.</param>
+        /// <returns>Retorna un IFeature.</returns>
+        public static IFeature selectedfeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        {
+            IFeatureCursor featureCursor = selectedFeatureCursor(layerName, activeView, envelope, eltiporelacion);
+            IFeature feature = featureCursor.NextFeature();
+            activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
+            return feature;
+        }
         /// <summary> Cambia la propiedad de visibilidad / enciende o apaga la capa </summary>
         /// <param name="nomLayer"> nombre del layer a buscar.</param>
         /// <param name="bandera"> valor booleano de visible</param>
@@ -207,28 +298,6 @@ namespace featureTools
             pLayer = returnLayerByName(pMxDoc, nomLayer);
             pLayer.Visible = bandera;
         }
-        /// <summary> Cambia la propiedad de visibilidad / enciende o apaga de un grupo de capas </summary>
-        /// <param name="nomGroupLayer">Nombre del Grouplayer a buscar.</param>
-        /// <param name="bandera">Valor booleano de visible</param>
-        /// <param name="pMxDoc"> ArcMap.Document.</param>
-        public static void groupLayerVisible(IMxDocument pMxDoc, string nomGroupLayer, bool bandera)
-        {
-            IGroupLayer pLayer = default(IGroupLayer);
-            pLayer = getGrpLayerByName(pMxDoc, nomGroupLayer);
-            pLayer.Visible = bandera;
-        }
-        /// <summary>Retorna un true o false en base a la existencia del nombre del layer</summary>
-        /// <param name="layer">Nombre del layer a buscar.</param>
-        /// <param name="pMxDoc">ArcMap.Document.</param>
-        /// <returns>Devuelve boolean.</returns>
-        public static bool existeono(IMxDocument pMxDoc, string layer)
-        {
-            ILayer capa = returnLayerByName(pMxDoc, layer);
-            if (capa == null)
-                return false;
-            else
-                return true;
-        }
         /// <summary>Retorna una layer en base al nombre</summary>
         /// <param name="layer">Nombre del layer a buscar.</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
@@ -236,7 +305,7 @@ namespace featureTools
         /// <param name="pMap"> Mapa activado.</param>
         /// <returns>Devuelve un ILayer.</returns>
         public static ILayer returnLayerByName(IMxDocument pMxDoc, string layer, IActiveView activeView = null, IMap pMap=null)
-        {
+        {try{
             if (pMap ==null)
                 pMap = pMxDoc.FocusMap;
             if (activeView!=null)
@@ -248,7 +317,8 @@ namespace featureTools
                     return pLayer;
                 pLayer = pLayers.Next();
             }
-            return null;
+            return null; }
+        catch (System.Exception ex) { MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "returnLayerByName"); throw ex; }
         }
         /// <summary>Retorna un IFeatureLayer2 en base al nombre</summary>
         /// <param name="layer">Nombre del layer a buscar.</param>
@@ -313,6 +383,55 @@ namespace featureTools
             }
             return col;
         }
+        /// <summary>Retorna un string el valor de un campo de un Feature Class</summary>
+        /// <param name="fc">Nombre del Feature a buscar.</param>
+        /// <param name="fld">Nombre del campo</param>
+        /// <returns>Devuelve un string del valor.</returns>
+        public static string returnFirstFieldData(IFeatureClass fc, String fld){
+        try{
+            int iFldIndex = fc.Fields.FindField(fld);
+            IFeatureCursor pFCursor = fc.Search(null, false);
+            IFeature pFeature;
+            string col = " ";
+            pFeature = pFCursor.NextFeature();
+            if (!(pFeature == null))
+                col = pFeature.get_Value(iFldIndex).ToString();
+            return col; }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "returnFirstFieldData");
+                return "-1";
+            }
+        }
+        /// <summary>Retorna un ArrayList de valores de un campo en un Feature Class</summary>
+        /// <param name="fc">Feature class en el que buscar.</param>
+        /// <param name="row">Nombres de los campos</param>
+        /// <param name="condicionWhere">Condicion de seleccion</param>
+        /// <returns>Devuelve un ArrayList de valores.</returns>
+        public DataTable returnDataSeleccion(IFeatureClass fc, ArrayList row, string condicionWhere)
+        {
+            DataTable dt = new DataTable();
+            IQueryFilter qf = new QueryFilterClass();
+            string n;
+            qf.WhereClause = condicionWhere;
+            foreach (var c in row)
+                dt.Columns.Add(c.ToString());
+            IFeatureCursor updateCursor = fc.Search(qf, true);
+            IFeature feature = null;
+            while ((feature = updateCursor.NextFeature()) != null)
+            {
+                int i = 0;
+                System.Object[] O = new System.Object[row.Count];
+                foreach (var c in row)
+                {
+                    n = c.ToString();
+                    O[i] = feature.get_Value(fc.FindField(n)).ToString();
+                    i++;
+                }
+                dt.Rows.Add(O);
+            }
+            return dt;
+        }
         /// <summary>Retorna un ArrayList en base a la geometria del Layer</summary>
         /// <param name="pMxDoc">ArcMap.Document.</param>
         /// <param name="FT">Geometria del layer a buscar.</param>
@@ -362,29 +481,6 @@ namespace featureTools
             }
             return col;
         }
-        /// <summary>Retorna un IGroupLayer en base al nombre</summary>
-        /// <param name="layer">Nombre del layer o grupo a buscar</param>
-        /// <param name="pMxDoc">ArcMap.Document.</param>
-        /// <returns>Devuelve un IGroupLayer.</returns>
-        protected static IGroupLayer getGrpLayerByName(IMxDocument pMxDoc, string layer)
-        {
-            IMap pMap = pMxDoc.FocusMap;
-            IEnumLayer pLayers = pMap.Layers;
-            ILayer pLayer;
-            IGroupLayer pGroupLayer;
-            pGroupLayer = null;
-            pMap = pMxDoc.FocusMap;
-            pLayers = pMap.Layers;
-            for (int i = 0; i < pMap.LayerCount; i++)
-                if (pMap.get_Layer(i).Name == layer) {
-                    pLayer = pMap.get_Layer(i);
-                    if (pLayer is IGroupLayer) {
-                        pGroupLayer = (IGroupLayer)pLayer;
-                        return pGroupLayer;
-                    }
-                }
-            return pGroupLayer;
-        }
         /// <summary>Retorna un ArrayList de los valores contenidos en una columna</summary>
         /// <param name="layer">Layer o grupo a buscar</param>
         /// <param name="campo">Campo de origen de valores.</param>
@@ -398,21 +494,6 @@ namespace featureTools
             colVals = returnFieldData(fc, campo);
             return colVals;
         }
-        /// <summary>Retorna el número de elementos seleccionados según una condición</summary>
-        /// <param name="condicion">Condición para realizar la selección</param>
-        /// <param name="Layer">Layer de origen de valores.</param>
-        /// <returns> Devuelve un entero.</returns>
-        public static int cuentaSeleccion(string condicion, ILayer Layer)
-        {
-            ISelectionSet pSelSet;
-            try {
-                pSelSet = seleccionByAttributeQuery(condicion, Layer).SelectionSet;
-                return pSelSet.Count;
-            }
-            catch (System.Exception ex) {
-                throw ex;
-            }
-        }
         /// <summary>Realiza una seleccion según una condición</summary>
         /// <param name="condicion">Condición para realizar la selección</param>
         /// <param name="Layer">Layer de origen de valores.</param>
@@ -425,7 +506,7 @@ namespace featureTools
             IFeatureLayer pfLayer= (IFeatureLayer)Layer;
             try {
                 queryFilter.WhereClause = condicion;
-                ESRI.ArcGIS.Carto.IFeatureSelection featureSelection = pfLayer as ESRI.ArcGIS.Carto.IFeatureSelection;
+                 IFeatureSelection featureSelection = pfLayer as IFeatureSelection;
               /*  if (activeView != null)
                     activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);*/
                 if (b)
@@ -443,10 +524,13 @@ namespace featureTools
         /// <summary>Remueve una capa de la tabla de contenidos</summary>
         /// <param name="capa">Nombre de la capa</param>
         /// <param name="pMxDoc">ArcMap.Document.</param>
-        public static void limpiarZonasTmp(IMxDocument pMxDoc, string capa)
-        {
-            IMap pMap = pMxDoc.FocusMap;
-            pMap.DeleteLayer(returnLayerByName(pMxDoc, capa));
+        public static void limpiarZonasTmp(IMxDocument pMxDoc, string capa){
+            try {
+                IMap pMap = pMxDoc.FocusMap;
+                pMap.DeleteLayer(returnLayerByName(pMxDoc, capa));
+            }catch (System.Exception ex) {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "selectClip");
+            }
         }
         /// <summary>Remueve la selección de todos los elementos</summary>
         /// <param name="pMxDoc">ArcMap.Document.</param>
@@ -482,48 +566,6 @@ namespace featureTools
                     polygonToPolyline.AddGeometry((IGeometry)pSegs_Path);
                 }
                 return polygonToPolyline;} catch (System.Exception ex) {
-                throw ex;
-            }
-        }
-        /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
-        /// <param name="pMxDoc">ArcMap.Document.</param>
-        /// <param name="capa">Nombre de la capa</param>
-        public static void zoomToSeleccion(IMxDocument pMxDoc, string capa)
-        {
-            ILayer pLayer = default(ILayer);
-            IFeatureSelection pfSelection = default(IFeatureSelection);
-            ISelectionSet pSelSet = default(ISelectionSet);
-            IEnumGeometry pEnumGeom = default(IEnumGeometry);
-            IEnumGeometryBind pEnumGeomBind;
-            IGeometryFactory pGeomFactory;
-            IGeometry pGeom = default(IGeometry);
-            try {
-                pLayer = returnLayerByName(pMxDoc, capa);
-                pfSelection = (IFeatureSelection)pLayer;
-                pSelSet = pfSelection.SelectionSet;
-                pEnumGeom = new EnumFeatureGeometry();
-                pEnumGeomBind = (IEnumGeometryBind)pEnumGeom;
-                pEnumGeomBind.BindGeometrySource(null, pSelSet);
-                pGeomFactory = (IGeometryFactory)new GeometryEnvironment();
-                pGeom = pGeomFactory.CreateGeometryFromEnumerator(pEnumGeom);
-                pMxDoc.ActiveView.Extent = pGeom.Envelope;
-            } catch (System.Exception ex) {
-                throw ex;
-            }
-        }
-        /// <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
-        /// <param name="application">Entorno de arcmap</param>
-        /// <param name="commandName">Comando a ejecutar</param>
-        public static void FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication application, string commandName) {
-            try {
-                ESRI.ArcGIS.Framework.ICommandBars commandBars = application.Document.CommandBars;
-                ESRI.ArcGIS.esriSystem.UID uid = new ESRI.ArcGIS.esriSystem.UIDClass();
-                uid.Value = commandName; // Example: "esriFramework.HelpContentsCommand" or "{D74B2F25-AC90-11D2-87F8-0000F8751720}"
-                ESRI.ArcGIS.Framework.ICommandItem commandItem = commandBars.Find(uid, false, false);
-                if (commandItem != null)
-                 commandItem.Execute();
-            }catch (System.Exception ex)
-            {
                 throw ex;
             }
         }
@@ -564,34 +606,49 @@ namespace featureTools
                 MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "startEditing");
             }
         }
-        /// <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-        /// <param name="pgeometry"> Visualizacion activa.</param>
+        /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
         /// <param name="pMxDoc">ArcMap.Document.</param>
-        /// <param name="layer">Layer a editar</param>
-        /// <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
-        /// <returns>Retorna el fid de tipo entero.</returns>
-        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer, System.Object elObjeto=null)
+        /// <param name="capa">Nombre de la capa</param>
+        public static void zoomToSeleccion(IMxDocument pMxDoc, string capa)
         {
-            try
-            {
-                IFeatureClass pFeatureClass = returnFeatureClassByName(pMxDoc, layerName);
-                IActiveView activeView = pMxDoc.ActivatedView;
-                IFeature pFeature = pFeatureClass.CreateFeature();
-                pFeature.Shape = pgeometry;
-                if(elObjeto != null)
-                    insertDato(pFeatureClass,ref pFeature, elObjeto);
-                pFeature.Store();
-                activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
-                return pFeature.OID;
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "createFeature");
-                return -1;
+            ILayer pLayer = default(ILayer);
+            IFeatureSelection pfSelection = default(IFeatureSelection);
+            ISelectionSet pSelSet = default(ISelectionSet);
+            IEnumGeometry pEnumGeom = default(IEnumGeometry);
+            IEnumGeometryBind pEnumGeomBind;
+            IGeometryFactory pGeomFactory;
+            IGeometry pGeom = default(IGeometry);
+            try {
+                pLayer = returnLayerByName(pMxDoc, capa);
+                pfSelection = (IFeatureSelection)pLayer;
+                pSelSet = pfSelection.SelectionSet;
+                pEnumGeom = new EnumFeatureGeometry();
+                pEnumGeomBind = (IEnumGeometryBind)pEnumGeom;
+                pEnumGeomBind.BindGeometrySource(null, pSelSet);
+                pGeomFactory = (IGeometryFactory)new GeometryEnvironment();
+                pGeom = pGeomFactory.CreateGeometryFromEnumerator(pEnumGeom);
+                pMxDoc.ActiveView.Extent = pGeom.Envelope;
+            } catch (System.Exception ex) {
+                throw ex;
             }
         }
-       
+        /*
+         public void iFeatureCursor_UpdateFeaure(IFeatureClass featureClass, string condicion,string campo, string upDate)
+        {
+            IQueryFilter queryFilter = new QueryFilterClass();
+            queryFilter.WhereClause = campo+condicion;
+            IFeatureCursor updateCursor = featureClass.Update(queryFilter, false);
+            int fieldIndex = featureClass.FindField(campo);
+            IFeature feature = null;
+            while ((feature = updateCursor.NextFeature()) != null){
+                feature.set_Value(fieldIndex, upDate); //"C" = domain value for Commercial
+                updateCursor.UpdateFeature(feature);
+            }
+            //Marshal.ReleaseComObject(updateCursor);
+        }
+         */
         private static void insertDato(IFeatureClass pFeatureClass, ref IFeature pFeature, System.Object elObjeto) {
+            try {
                 foreach (var prop in elObjeto.GetType().GetProperties()) {//Se recorre el arrays y actualiza los valores
                     int contractorFieldIndex = pFeatureClass.FindField(prop.Name);
                     if (contractorFieldIndex >= 0)
@@ -619,6 +676,37 @@ namespace featureTools
                                 break;
                         }
                 }
+            } catch (System.Exception ex) { throw ex; }
         }
-   }
+        /// <summary>Realza un insert nuevos datos en u l</summary>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="capa">Nombre de la capa</param>
+        /// <param name="queryFilter">IQueryFilter que selcciono en la capa</param>
+        /// <param name="myFeature"> El IFeature del elemento a seleccionado</param> 
+        /// <param name="elObjeto">Arreglo de Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+        public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter, IFeature myFeature, object elObjeto)
+        {
+            try {
+                ILayer olayer = featureTools.feature.returnLayerByName(pMxDoc, capa, pMxDoc.ActiveView, null);
+                IMap pMap = (IMap)pMxDoc.ActiveView.FocusMap;
+                startEditing(pMap, "Editar", olayer);
+                IFeatureClass featureClass = returnFeatureClassByName(pMxDoc, capa);
+                IFeatureCursor searchCursor = featureClass.Search(queryFilter, false);
+                // System.Object elObjeto
+                if (elObjeto != null)
+                    insertDato(featureClass, ref myFeature, elObjeto);
+                // Stop the edit operation.
+                startEditing(pMap, "Terminar Guardando", olayer);
+            } catch (System.Exception ex) { throw ex; }
+        }
+        /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
+        /// <param name="outputFeatureClass">IFeatureClass destino</param>
+        /// <param name="inFeatureClass">IFeatureClass origen</param>
+        /// <param name="select">clausula para selccionar de la capa origen</param>
+        /// <param name="campos">campos para selccionar de la capa origen</param>
+        public static void loadObjects( IFeatureClass outputFeatureClass, IFeatureClass inFeatureClass, string select,string campos)
+        {
+            
+        }
+    }
 }

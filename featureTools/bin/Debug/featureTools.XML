@@ -8,13 +8,42 @@
             <summary>Proporciona herramientas básicas para trabajar con Capas</summary>
             <remarks>Realiza operaciones de consulta y cambio de propiedades de las capas en ArcMap</remarks>
         </member>
-        <member name="M:featureTools.feature.selectedfeature(System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geometry.IEnvelope,ESRI.ArcGIS.Geodatabase.esriSpatialRelEnum)">
-            <summary> Retorna un IFeatureCursor en base a un nombre de layer</summary>
+        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.Object)">
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-            <param name="activeView"> Visualizacion activa.</param>
-            <param name="envelope"> IEnvelope.</param>
-            <param name="eltiporelacion"> El tipo de relacion.</param>
-            <returns>Retorna un IFeature.</returns>
+            <param name="pgeometry"> Visualizacion activa.</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="layer">Layer a editar</param>
+            <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+            <returns>Retorna el fid de tipo entero.</returns>
+        </member>
+        <member name="M:featureTools.feature.cuentaSeleccion(System.String,ESRI.ArcGIS.Carto.ILayer)">
+            <summary>Retorna el número de elementos seleccionados según una condición</summary>
+            <param name="condicion">Condición para realizar la selección</param>
+            <param name="Layer">Layer de origen de valores.</param>
+            <returns> Devuelve un entero.</returns>
+        </member>
+        <member name="M:featureTools.feature.existeono(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
+            <summary>Retorna un true o false en base a la existencia del nombre del layer</summary>
+            <param name="layer">Nombre del layer a buscar.</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <returns>Devuelve boolean.</returns>
+        </member>
+        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String)">
+            <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
+            <param name="application">Entorno de arcmap</param>
+            <param name="commandName">Comando a ejecutar</param>
+        </member>
+        <member name="M:featureTools.feature.getGrpLayerByName(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
+            <summary>Retorna un IGroupLayer en base al nombre</summary>
+            <param name="layer">Nombre del layer o grupo a buscar</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <returns>Devuelve un IGroupLayer.</returns>
+        </member>
+        <member name="M:featureTools.feature.groupLayerVisible(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.Boolean)">
+            <summary> Cambia la propiedad de visibilidad / enciende o apaga de un grupo de capas </summary>
+            <param name="nomGroupLayer">Nombre del Grouplayer a buscar.</param>
+            <param name="bandera">Valor booleano de visible</param>
+            <param name="pMxDoc"> ArcMap.Document.</param>
         </member>
         <member name="M:featureTools.feature.selectedfeatures(System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geometry.IEnvelope,ESRI.ArcGIS.Geodatabase.esriSpatialRelEnum)">
             <summary> Retorna un IFeatureCursor </summary>
@@ -24,21 +53,13 @@
             <param name="eltiporelacion"> El tipo de relacion.</param>
             <returns>Retorna un IFeatureCursor.</returns>
         </member>
-        <member name="M:featureTools.feature.selectedFeature(System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geometry.IEnvelope,ESRI.ArcGIS.Geodatabase.esriSpatialRelEnum)">
+        <member name="M:featureTools.feature.selectedFeatureCursor(System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geometry.IEnvelope,ESRI.ArcGIS.Geodatabase.esriSpatialRelEnum)">
             <summary> Retorna un IFeatureCursor </summary>
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
             <param name="activeView"> Visualizacion activa.</param>
             <param name="envelope"> IEnvelope.</param>
             <param name="eltiporelacion"> El tipo de relacion.</param>
             <returns>Retorna un IFeatureCursor.</returns>
-        </member>
-        <member name="M:featureTools.feature.selectByPoint(System.Int32,System.Int32,System.String,ESRI.ArcGIS.Carto.IActiveView)">
-            <summary> Permiete seleccionar un elemento por un par de coordenas X,Y</summary>
-            <param name="x"> coordenada x.</param>
-            <param name="y"> coordenada y.</param>
-            <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
-            <param name="ActiveView"> Visualizacion activa.</param>
-            <returns>Retorna un IEnvelope.</returns>
         </member>
         <member name="M:featureTools.feature.selectByPoint(System.Int32,System.Int32,ESRI.ArcGIS.Carto.IActiveView)">
             <summary> Permiete seleccionar un elemento por un par de coordenas X,Y</summary>
@@ -96,23 +117,19 @@
             <param name="ActiveView"> Visualizacion activa.</param>
             <returns>Retorna un IFeature.</returns>
         </member>
+        <member name="M:featureTools.feature.selectedfeature(System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geometry.IEnvelope,ESRI.ArcGIS.Geodatabase.esriSpatialRelEnum)">
+            <summary> Retorna un IFeatureCursor en base a un nombre de layer</summary>
+            <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
+            <param name="activeView"> Visualizacion activa.</param>
+            <param name="envelope"> IEnvelope.</param>
+            <param name="eltiporelacion"> El tipo de relacion.</param>
+            <returns>Retorna un IFeature.</returns>
+        </member>
         <member name="M:featureTools.feature.layerVisible(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.Boolean)">
             <summary> Cambia la propiedad de visibilidad / enciende o apaga la capa </summary>
             <param name="nomLayer"> nombre del layer a buscar.</param>
             <param name="bandera"> valor booleano de visible</param>
             <param name="pMxDoc"> ArcMap.Document.</param>
-        </member>
-        <member name="M:featureTools.feature.groupLayerVisible(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.Boolean)">
-            <summary> Cambia la propiedad de visibilidad / enciende o apaga de un grupo de capas </summary>
-            <param name="nomGroupLayer">Nombre del Grouplayer a buscar.</param>
-            <param name="bandera">Valor booleano de visible</param>
-            <param name="pMxDoc"> ArcMap.Document.</param>
-        </member>
-        <member name="M:featureTools.feature.existeono(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
-            <summary>Retorna un true o false en base a la existencia del nombre del layer</summary>
-            <param name="layer">Nombre del layer a buscar.</param>
-            <param name="pMxDoc">ArcMap.Document.</param>
-            <returns>Devuelve boolean.</returns>
         </member>
         <member name="M:featureTools.feature.returnLayerByName(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Carto.IMap)">
             <summary>Retorna una layer en base al nombre</summary>
@@ -146,6 +163,19 @@
             <param name="fld">Nombre del campo</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
+        <member name="M:featureTools.feature.returnFirstFieldData(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String)">
+            <summary>Retorna un string el valor de un campo de un Feature Class</summary>
+            <param name="fc">Nombre del Feature a buscar.</param>
+            <param name="fld">Nombre del campo</param>
+            <returns>Devuelve un string del valor.</returns>
+        </member>
+        <member name="M:featureTools.feature.returnDataSeleccion(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.Collections.ArrayList,System.String)">
+            <summary>Retorna un ArrayList de valores de un campo en un Feature Class</summary>
+            <param name="fc">Feature class en el que buscar.</param>
+            <param name="row">Nombres de los campos</param>
+            <param name="condicionWhere">Condicion de seleccion</param>
+            <returns>Devuelve un ArrayList de valores.</returns>
+        </member>
         <member name="M:featureTools.feature.returnFeatureLayers(ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Geometry.esriGeometryType)">
             <summary>Retorna un ArrayList en base a la geometria del Layer</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
@@ -158,24 +188,12 @@
             <param name="FT">Geometria del layer a buscar.</param>
             <returns>Devuelve un ArrayList.</returns>
         </member>
-        <member name="M:featureTools.feature.getGrpLayerByName(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
-            <summary>Retorna un IGroupLayer en base al nombre</summary>
-            <param name="layer">Nombre del layer o grupo a buscar</param>
-            <param name="pMxDoc">ArcMap.Document.</param>
-            <returns>Devuelve un IGroupLayer.</returns>
-        </member>
         <member name="M:featureTools.feature.listadeValores(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.String)">
             <summary>Retorna un ArrayList de los valores contenidos en una columna</summary>
             <param name="layer">Layer o grupo a buscar</param>
             <param name="campo">Campo de origen de valores.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
             <returns> Devuelve un ArrayList.</returns>
-        </member>
-        <member name="M:featureTools.feature.cuentaSeleccion(System.String,ESRI.ArcGIS.Carto.ILayer)">
-            <summary>Retorna el número de elementos seleccionados según una condición</summary>
-            <param name="condicion">Condición para realizar la selección</param>
-            <param name="Layer">Layer de origen de valores.</param>
-            <returns> Devuelve un entero.</returns>
         </member>
         <member name="M:featureTools.feature.seleccionByAttributeQuery(System.String,ESRI.ArcGIS.Carto.ILayer,System.Boolean,ESRI.ArcGIS.Carto.IActiveView)">
             <summary>Realiza una seleccion según una condición</summary>
@@ -199,29 +217,31 @@
             <param name="pElementofPolygon">Nombre de la capa</param>
             <returns>Retorna un IPolyline.</returns>
         </member>
-        <member name="M:featureTools.feature.zoomToSeleccion(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
-            <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
-            <param name="pMxDoc">ArcMap.Document.</param>
-            <param name="capa">Nombre de la capa</param>
-        </member>
-        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String)">
-            <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
-            <param name="application">Entorno de arcmap</param>
-            <param name="commandName">Comando a ejecutar</param>
-        </member>
         <member name="M:featureTools.feature.startEditing(ESRI.ArcGIS.Carto.IMap,System.String,ESRI.ArcGIS.Carto.ILayer)">
             <summary>Inicia edicion en un layer especifico</summary>
             <param name="m_mapControl">IMxDocument .FocusMap.</param>
             <param name="tipo">Opcion para la edicion</param>
             <param name="cLayer">Layer a editar</param>
         </member>
-        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.Object)">
-            <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-            <param name="pgeometry"> Visualizacion activa.</param>
+        <member name="M:featureTools.feature.zoomToSeleccion(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
+            <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
-            <param name="layer">Layer a editar</param>
-            <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
-            <returns>Retorna el fid de tipo entero.</returns>
+            <param name="capa">Nombre de la capa</param>
+        </member>
+        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature,System.Object)">
+            <summary>Realza un insert nuevos datos en u l</summary>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="capa">Nombre de la capa</param>
+            <param name="queryFilter">IQueryFilter que selcciono en la capa</param>
+            <param name="myFeature"> El IFeature del elemento a seleccionado</param> 
+            <param name="elObjeto">Arreglo de Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+        </member>
+        <member name="M:featureTools.feature.loadObjects(ESRI.ArcGIS.Geodatabase.IFeatureClass,ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String,System.String)">
+            <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
+            <param name="outputFeatureClass">IFeatureClass destino</param>
+            <param name="inFeatureClass">IFeatureClass origen</param>
+            <param name="select">clausula para selccionar de la capa origen</param>
+            <param name="campos">campos para selccionar de la capa origen</param>
         </member>
     </members>
 </doc>
