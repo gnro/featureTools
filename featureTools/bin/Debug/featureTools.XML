@@ -217,6 +217,11 @@
             <param name="pElementofPolygon">Nombre de la capa</param>
             <returns>Retorna un IPolyline.</returns>
         </member>
+        <member name="M:featureTools.feature.createPolygonFromPolygon(ESRI.ArcGIS.Geometry.IGeometry)">
+            <summary>Realza la conversion de polygono a polilineas</summary>        
+            <param name="pElementofPolygon">Nombre de la capa</param>
+            <returns>Retorna un IPolyline.</returns>
+        </member>
         <member name="M:featureTools.feature.startEditing(ESRI.ArcGIS.Carto.IMap,System.String,ESRI.ArcGIS.Carto.ILayer)">
             <summary>Inicia edicion en un layer especifico</summary>
             <param name="m_mapControl">IMxDocument .FocusMap.</param>
@@ -228,7 +233,7 @@
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
         </member>
-        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature,System.Object)">
+        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature@,System.String[0:,0:])">
             <summary>Realza un insert nuevos datos en u l</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
@@ -242,6 +247,13 @@
             <param name="inFeatureClass">IFeatureClass origen</param>
             <param name="select">clausula para selccionar de la capa origen</param>
             <param name="campos">campos para selccionar de la capa origen</param>
+        </member>
+        <member name="M:featureTools.feature.copiaPoligono(ESRI.ArcGIS.Geodatabase.IFeature,System.String,ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String[0:,0:])">
+            <summary> Copia y pega un elemento en un capa destino agregando los campos</summary>
+            <param name="myfeatureOrigen">feature (poligono) selecciono </param>
+            <param name="capaDestino">Layer a editar y pegar el feature</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="campos">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
         </member>
     </members>
 </doc>

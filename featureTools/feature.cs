@@ -283,9 +283,12 @@ namespace featureTools
         /// <returns>Retorna un IFeature.</returns>
         public static IFeature selectedfeature(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
         {
-            IFeatureCursor featureCursor = selectedFeatureCursor(layerName, activeView, envelope, eltiporelacion);
+            IFeatureCursor featureCursor = null;
+            featureCursor =selectedFeatureCursor(layerName, activeView, envelope, eltiporelacion);
             IFeature feature = featureCursor.NextFeature();
             activeView.PartialRefresh(esriViewDrawPhase.esriViewGeoSelection, null, null);
+            featureCursor = null;
+            //System.Runtime.InteropServices.Marshal.FinalReleaseComObject(featureCursor);
             return feature;
         }
         /// <summary> Cambia la propiedad de visibilidad / enciende o apaga la capa </summary>
@@ -551,7 +554,24 @@ namespace featureTools
             } catch (System.Exception ex) {
                 throw ex;
             }
-         }
+        }
+        /// <summary>Realza la conversion de polygono a polilineas</summary>        
+        /// <param name="pElementofPolygon">Nombre de la capa</param>
+        /// <returns>Retorna un IPolyline.</returns>
+        public static IPolygon createPolygonFromPolygon(IGeometry pElementofPolygon)
+        {
+            try
+            {
+                IPolygon pPolyline = default(IPolygon);
+                IPolygon tmp = (IPolygon)pElementofPolygon;
+                pPolyline = (IPolygon)/*polygonToPolyline*/(tmp);
+                return pPolyline;
+            }
+            catch (System.Exception ex)
+            {
+                throw ex;
+            }
+        }
         private static IGeometryCollection polygonToPolyline(IPolygon pPolygon) {
             try {
                 IGeometryCollection polygonToPolyline = new PolylineClass();
@@ -659,6 +679,7 @@ namespace featureTools
                                 pFeature.set_Value(contractorFieldIndex, dvalor);
                                 break;
                             case "Int":
+                            case "int":
                             case "Single":
                             case "Int16":
                             case "Int32":
@@ -678,13 +699,52 @@ namespace featureTools
                 }
             } catch (System.Exception ex) { throw ex; }
         }
+        private static void insertDatoS(IFeatureClass pFeatureClass, ref IFeature pFeature, string[,] elObjeto)
+        {
+            try
+            {
+                int n = elObjeto.GetLength(0);
+                for (int i = 0; i < n; i++)
+                {//Se recorre el arrays y actualiza los valores
+                    int contractorFieldIndex = pFeatureClass.FindField(elObjeto[i, 0].ToString());
+                    if (contractorFieldIndex >= 0) {
+                        string sw = elObjeto[i, 1].ToString();
+                        switch (sw) {
+                            case "double":
+                            case "Double":
+                                double dvalor = double.Parse(elObjeto[i, 2].ToString());
+                                pFeature.set_Value(contractorFieldIndex, dvalor);
+                                break;
+                            case "Int":
+                            case "int":
+                            case "Single":
+                            case "Int16":
+                            case "Int32":
+                                int pvalor = Int32.Parse(elObjeto[i, 2].ToString());
+                                pFeature.set_Value(contractorFieldIndex, pvalor);
+                                break;
+                            case "Str":
+                            case "string":
+                            case "String":
+                                pFeature.set_Value(contractorFieldIndex, elObjeto[i, 2].ToString());
+                                break;
+                            case "Date":
+                                if (elObjeto[i, 2].ToString() == "hoy")
+                                    pFeature.set_Value(contractorFieldIndex, DateTime.Today);
+                                break;
+                    }
+                }
+                }
+            }
+            catch (System.Exception ex) { throw ex; }
+        }
         /// <summary>Realza un insert nuevos datos en u l</summary>
         /// <param name="pMxDoc">ArcMap.Document.</param>
         /// <param name="capa">Nombre de la capa</param>
         /// <param name="queryFilter">IQueryFilter que selcciono en la capa</param>
         /// <param name="myFeature"> El IFeature del elemento a seleccionado</param> 
         /// <param name="elObjeto">Arreglo de Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
-        public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter, IFeature myFeature, object elObjeto)
+        public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter, ref IFeature myFeature, string[,] elObjeto)
         {
             try {
                 ILayer olayer = featureTools.feature.returnLayerByName(pMxDoc, capa, pMxDoc.ActiveView, null);
@@ -693,8 +753,9 @@ namespace featureTools
                 IFeatureClass featureClass = returnFeatureClassByName(pMxDoc, capa);
                 IFeatureCursor searchCursor = featureClass.Search(queryFilter, false);
                 // System.Object elObjeto
+                MessageBox.Show(myFeature.OID.ToString());
                 if (elObjeto != null)
-                    insertDato(featureClass, ref myFeature, elObjeto);
+                    insertDatoS(featureClass, ref myFeature, elObjeto);
                 // Stop the edit operation.
                 startEditing(pMap, "Terminar Guardando", olayer);
             } catch (System.Exception ex) { throw ex; }
@@ -706,65 +767,87 @@ namespace featureTools
         /// <param name="campos">campos para selccionar de la capa origen</param>
         public static void loadObjects( IFeatureClass outputFeatureClass, IFeatureClass inFeatureClass, string select,string campos)
         {
-            
+            try {
+                IQueryFilter queryFilter = new QueryFilterClass();
+                queryFilter.SubFields = campos;
+                queryFilter.WhereClause = select;
+                IFields allFields = outputFeatureClass.Fields;
+                IFields outFields = new FieldsClass();
+                IFieldsEdit outFieldsEdit = outFields as IFieldsEdit;
+                String[] subFields = (queryFilter.SubFields).Split(',');
+                for (int j = 0; j < subFields.Length; j++){
+                    int fieldID = allFields.FindField(subFields[j]);
+                    if (fieldID == -1)
+                    {
+                        System.Windows.Forms.MessageBox.Show("EL campo " + subFields[j]+" no fue encontrado");
+                        return;
+                    }
+                    outFieldsEdit.AddField(allFields.get_Field(fieldID));
+                }
+
+                IObjectLoader objectLoader = new ObjectLoader();
+                IEnumInvalidObject invalidObjectEnum=null;
+                objectLoader.LoadObjects(
+                    null,
+                    (ITable)inFeatureClass,
+                    queryFilter,
+                    (ITable)outputFeatureClass,
+                    outFields,
+                    false,
+                    0,
+                    false,
+                    false,
+                    10,
+                    out invalidObjectEnum
+                );
+                IInvalidObjectInfo invalidObject = invalidObjectEnum.Next();
+                if (invalidObject != null)
+                    System.Windows.Forms.MessageBox.Show("Some or all features did not load");
+            }
+            catch (System.Exception ex) { throw ex; }
         }
-        /*public void loadObjects(String output, String input, String outputFeatureClassName, String inputFeatureClassName)
-{
-    //Set up the output feature classes, i.e. the destination
-    IWorkspaceFactory outputWorkspaceFactory = new AccessWorkspaceFactoryClass();
-
-    IFeatureWorkspace outputFeatureWorkspace = outputWorkspaceFactory.OpenFromFile(output, 0) as IFeatureWorkspace;
-    IFeatureClass outputFeatureClass = outputFeatureWorkspace.OpenFeatureClass(outputFeatureClassName);
-    // Set up the input feature classe, i.e. the data source
-    IWorkspaceFactory inFeatureWorkspaceFactory = new AccessWorkspaceFactoryClass();
-    IFeatureWorkspace inFeatureWorkspace = inFeatureWorkspaceFactory.OpenFromFile(input, 0) as IFeatureWorkspace;
-    IFeatureClass inFeatureClass = inFeatureWorkspace.OpenFeatureClass(inputFeatureClassName);
-    // Specify a subset of the input data
-    IQueryFilter queryFilter = new QueryFilterClass();
-    queryFilter.SubFields = "SHAPE,STATE_NAME,STATE_FIPS,AREA";
-    queryFilter.WhereClause = "STATE_NAME = 'California' OR STATE_NAME = 'Oregon'";
-
-    //OutputFields parameter needs to match sub-fields in input queryfilter
-    IFields allFields = outputFeatureClass.Fields;
-    IFields outFields = new FieldsClass();
-    IFieldsEdit outFieldsEdit = outFields as IFieldsEdit;
-    // Get the query filter sub-fields as an array
-    // and loop through each field in turn,
-    // adding it to the ouput fields
-    String[] subFields = (queryFilter.SubFields).Split(',');
-    for(int j = 0; j < subFields.Length; j++)
-    {
-        int fieldID = allFields.FindField(subFields[j]);
-        if(fieldID == -1)
+        /// <summary> Copia y pega un elemento en un capa destino agregando los campos</summary>
+        /// <param name="myfeatureOrigen">feature (poligono) selecciono </param>
+        /// <param name="capaDestino">Layer a editar y pegar el feature</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="campos">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+        public static bool copiaPoligono(IFeature myfeatureOrigen, string capaDestino, IMxDocument pMxDoc,  string[,] campos)
         {
-            System.Windows.Forms.MessageBox.Show("field not found: " +  subFields[j]);
-            return;
+            try
+            {
+                IActiveView activeView = pMxDoc.ActivatedView;
+                ILayer layer= returnLayerByName(pMxDoc, capaDestino, activeView);
+                startEditing(activeView.FocusMap, "Editar", layer);
+                //elimina los colindantes que exitian
+                if (myfeatureOrigen == null)
+                    return false;
+                ESRI.ArcGIS.Geometry.IPolygon linepart = createPolygonFromPolygon(myfeatureOrigen.Shape);
+                if (linepart == null)
+                    return false;
+                if (linepart.IsEmpty)
+                    return false;
+                ISegmentCollection pSegmentCollection;
+                pSegmentCollection = (ISegmentCollection)linepart;
+                ISegment pSegment;
+                linepart = null;
+                int elfid;
+                for (int i = 0; i < pSegmentCollection.SegmentCount; i++)
+                {
+                    pSegment = pSegmentCollection.get_Segment(i);
+                    linepart = new ESRI.ArcGIS.Geometry.PolygonClass();
+                    linepart.FromPoint = pSegment.FromPoint;
+                    linepart.ToPoint = pSegment.ToPoint;
+                    //string[,] campos = new string[2, 3] { { "MANZANA", "int", "1" }, { "ESTADO", "int", "21" } };
+                    elfid = createFeature(capaDestino, linepart, pMxDoc, layer, campos);
+                }
+                startEditing(activeView.FocusMap, "Terminar Guardando", layer);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "copiaPoligono");
+                return false;
+            }
         }
-        outFieldsEdit.AddField(allFields.get_Field(fieldID));
-    }
-
-    IObjectLoader objectLoader = new ObjectLoaderClass();
-    IEnumInvalidObject invalidObjectEnum;
-    objectLoader.LoadObjects(
-        null,
-        (ITable)inFeatureClass,
-        queryFilter,
-        (ITable)outputFeatureClass,
-        outFields,
-        false,
-        0,
-        false,
-        false,
-        10,
-        out invalidObjectEnum
-    );
-       
-              
-    IInvalidObjectInfo invalidObject = invalidObjectEnum.Next();
-    if(invalidObject != null)
-    {
-        System.Windows.Forms.MessageBox.Show("Some or all features did not load");
-    }
-}*/
     }
 }
