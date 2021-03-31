@@ -29,7 +29,7 @@ namespace featureTools
         /// <param name="layer">Layer a editar</param>
         /// <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
         /// <returns>Retorna el fid de tipo entero.</returns>
-        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer, System.Object elObjeto=null)
+        public static int createFeature(string layerName, IGeometry pgeometry, IMxDocument pMxDoc, ILayer layer, string[,] elObjeto =null)
         {
             try
             {
@@ -38,7 +38,7 @@ namespace featureTools
                 IFeature pFeature = pFeatureClass.CreateFeature();
                 pFeature.Shape = pgeometry;
                 if(elObjeto != null)
-                    insertDato(pFeatureClass,ref pFeature, elObjeto);
+                    insertDatoS(pFeatureClass,ref pFeature, elObjeto);
                 pFeature.Store();
                 activeView.PartialRefresh(esriViewDrawPhase.esriViewGeography, layer, null);
                 return pFeature.OID;
@@ -747,17 +747,18 @@ namespace featureTools
         public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter, ref IFeature myFeature, string[,] elObjeto)
         {
             try {
-                ILayer olayer = featureTools.feature.returnLayerByName(pMxDoc, capa, pMxDoc.ActiveView, null);
-                IMap pMap = (IMap)pMxDoc.ActiveView.FocusMap;
-                startEditing(pMap, "Editar", olayer);
+                IActiveView activeView =pMxDoc.ActivatedView;
+                ILayer olayer = returnLayerByName(pMxDoc, capa, activeView);
+                if (myFeature == null)
+                    MessageBox.Show("Feature vacio");
+                startEditing(activeView.FocusMap, "Editar", olayer);
                 IFeatureClass featureClass = returnFeatureClassByName(pMxDoc, capa);
-                IFeatureCursor searchCursor = featureClass.Search(queryFilter, false);
-                // System.Object elObjeto
-                MessageBox.Show(myFeature.OID.ToString());
+                //IFeatureCursor searchCursor = featureClass.Search(queryFilter, false);
+                
                 if (elObjeto != null)
                     insertDatoS(featureClass, ref myFeature, elObjeto);
                 // Stop the edit operation.
-                startEditing(pMap, "Terminar Guardando", olayer);
+                startEditing(activeView.FocusMap, "Terminar Guardando", olayer);
             } catch (System.Exception ex) { throw ex; }
         }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
@@ -826,20 +827,13 @@ namespace featureTools
                     return false;
                 if (linepart.IsEmpty)
                     return false;
-                ISegmentCollection pSegmentCollection;
+               /* ISegmentCollection pSegmentCollection;
                 pSegmentCollection = (ISegmentCollection)linepart;
-                ISegment pSegment;
-                linepart = null;
+                */
+               // linepart = null;
                 int elfid;
-                for (int i = 0; i < pSegmentCollection.SegmentCount; i++)
-                {
-                    pSegment = pSegmentCollection.get_Segment(i);
-                    linepart = new ESRI.ArcGIS.Geometry.PolygonClass();
-                    linepart.FromPoint = pSegment.FromPoint;
-                    linepart.ToPoint = pSegment.ToPoint;
-                    //string[,] campos = new string[2, 3] { { "MANZANA", "int", "1" }, { "ESTADO", "int", "21" } };
                     elfid = createFeature(capaDestino, linepart, pMxDoc, layer, campos);
-                }
+               
                 startEditing(activeView.FocusMap, "Terminar Guardando", layer);
                 return true;
             }

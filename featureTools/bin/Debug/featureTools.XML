@@ -8,7 +8,7 @@
             <summary>Proporciona herramientas básicas para trabajar con Capas</summary>
             <remarks>Realiza operaciones de consulta y cambio de propiedades de las capas en ArcMap</remarks>
         </member>
-        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.Object)">
+        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.String[0:,0:])">
             <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
             <param name="pgeometry"> Visualizacion activa.</param>
             <param name="pMxDoc">ArcMap.Document.</param>
