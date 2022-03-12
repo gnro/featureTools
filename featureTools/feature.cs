@@ -45,7 +45,7 @@ namespace featureTools
             }
             catch (System.Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "createFeature");
+                throw new ArgumentException("createFeature\n Error: " + ex.Message + "\n" + ex.StackTrace );
                 return -1;
             }
         }
@@ -226,8 +226,7 @@ namespace featureTools
                 return null;
             }
             ESRI.ArcGIS.Display.IScreenDisplay screenDisplay = ActiveView.ScreenDisplay;
-            ESRI.ArcGIS.Display.IDisplayTransformation displayTransformation =
-                screenDisplay.DisplayTransformation;
+            ESRI.ArcGIS.Display.IDisplayTransformation displayTransformation = screenDisplay.DisplayTransformation;
             int[] c = { 0, 0 };
             displayTransformation.FromMapPoint(mapPoint, out c[0], out c[1]);
             return c;
@@ -321,7 +320,7 @@ namespace featureTools
                 pLayer = pLayers.Next();
             }
             return null; }
-        catch (System.Exception ex) { MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "returnLayerByName"); throw ex; }
+        catch (System.Exception ex) { throw new ArgumentException("returnLayerByName \n Error: " + ex.Message + "\n" + ex.StackTrace); throw ex; }
         }
         /// <summary>Retorna un IFeatureLayer2 en base al nombre</summary>
         /// <param name="layer">Nombre del layer a buscar.</param>
@@ -384,6 +383,35 @@ namespace featureTools
                 col.Add(pFeature.get_Value(iFldIndex));
                 pFeature = pFCursor.NextFeature();
             }
+            pFCursor = null;
+            return col;
+        }
+        /// <summary>Retorna un ArrayList de valores de un campo en una capa</summary>
+        /// <param name="layer">Nombre del layer a buscar.</param>
+        /// <param name="pMxDoc">ArcMap.Document.</param>
+        /// <param name="fld">Nombre del campo</param>
+        /// <returns>Devuelve un ArrayList de valores.</returns>
+        public static ArrayList returnFieldDataSelection(IMxDocument pMxDoc, string layer, String fld)
+        {
+            IFeatureLayer featureLayer = returnFeatureLayerByName(pMxDoc, layer) as IFeatureLayer;
+            if (featureLayer == null)
+                return null;
+            IFeatureClass fc = returnFeatureClassByName(pMxDoc, layer);
+            IFeatureSelection fSel = (IFeatureSelection)featureLayer;
+            ISelectionSet selSet = (ISelectionSet)fSel.SelectionSet;
+            ICursor cursor = null;
+            selSet.Search(null, false, out cursor);
+            IFeatureCursor pFCursor = cursor as IFeatureCursor;
+            cursor = null;
+            IFeature pFeature;
+            int iFldIndex = fc.Fields.FindField(fld);
+            ArrayList col = new ArrayList();
+            pFeature = pFCursor.NextFeature();
+            while (!(pFeature == null))
+            {
+                col.Add(pFeature.get_Value(iFldIndex));
+                pFeature = pFCursor.NextFeature();
+            }
             return col;
         }
         /// <summary>Retorna un string el valor de un campo de un Feature Class</summary>
@@ -399,27 +427,25 @@ namespace featureTools
             pFeature = pFCursor.NextFeature();
             if (!(pFeature == null))
                 col = pFeature.get_Value(iFldIndex).ToString();
+            pFCursor = null;
             return col; }
             catch (System.Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "returnFirstFieldData");
+                throw new ArgumentException("returnFirstFieldData \n Error: " + ex.Message + "\n" + ex.StackTrace);
                 return "-1";
             }
         }
         /// <summary>Retorna un ArrayList de valores de un campo en un Feature Class</summary>
         /// <param name="fc">Feature class en el que buscar.</param>
         /// <param name="row">Nombres de los campos</param>
-        /// <param name="condicionWhere">Condicion de seleccion</param>
         /// <returns>Devuelve un ArrayList de valores.</returns>
-        public DataTable returnDataSeleccion(IFeatureClass fc, ArrayList row, string condicionWhere)
+        public static DataTable returnData(IFeatureClass fc, ArrayList row)
         {
             DataTable dt = new DataTable();
-            IQueryFilter qf = new QueryFilterClass();
             string n;
-            qf.WhereClause = condicionWhere;
             foreach (var c in row)
                 dt.Columns.Add(c.ToString());
-            IFeatureCursor updateCursor = fc.Search(qf, true);
+            IFeatureCursor updateCursor = fc.Search(null, false);
             IFeature feature = null;
             while ((feature = updateCursor.NextFeature()) != null)
             {
@@ -433,6 +459,7 @@ namespace featureTools
                 }
                 dt.Rows.Add(O);
             }
+            updateCursor = null;
             return dt;
         }
         /// <summary>Retorna un ArrayList en base a la geometria del Layer</summary>
@@ -532,7 +559,7 @@ namespace featureTools
                 IMap pMap = pMxDoc.FocusMap;
                 pMap.DeleteLayer(returnLayerByName(pMxDoc, capa));
             }catch (System.Exception ex) {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "selectClip");
+                throw new ArgumentException("selectClip \n Error: " + ex.Message + "\n" + ex.StackTrace);
             }
         }
         /// <summary>Remueve la selección de todos los elementos</summary>
@@ -623,7 +650,7 @@ namespace featureTools
             }
             catch (System.Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "startEditing");
+                throw new ArgumentException("startEditing \n Error: " + ex.Message + "\n" + ex.StackTrace);
             }
         }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
@@ -667,38 +694,6 @@ namespace featureTools
             //Marshal.ReleaseComObject(updateCursor);
         }
          */
-        private static void insertDato(IFeatureClass pFeatureClass, ref IFeature pFeature, System.Object elObjeto) {
-            try {
-                foreach (var prop in elObjeto.GetType().GetProperties()) {//Se recorre el arrays y actualiza los valores
-                    int contractorFieldIndex = pFeatureClass.FindField(prop.Name);
-                    if (contractorFieldIndex >= 0)
-                        switch (prop.PropertyType.ToString().Substring(7, prop.PropertyType.ToString().Length - 7)){
-                            case "double":
-                            case "Double":
-                                double dvalor = double.Parse(prop.GetValue(elObjeto, null).ToString());
-                                pFeature.set_Value(contractorFieldIndex, dvalor);
-                                break;
-                            case "Int":
-                            case "int":
-                            case "Single":
-                            case "Int16":
-                            case "Int32":
-                                int pvalor = Int32.Parse(prop.GetValue(elObjeto, null).ToString());
-                                pFeature.set_Value(contractorFieldIndex, pvalor);
-                                break;
-                            case "Str":
-                            case "string":
-                            case "String":
-                                pFeature.set_Value(contractorFieldIndex, prop.GetValue(elObjeto, null).ToString());
-                                break;
-                            case "Date":
-                                if (prop.GetValue(elObjeto, null).ToString() == "hoy")
-                                    pFeature.set_Value(contractorFieldIndex, DateTime.Today);
-                                break;
-                        }
-                }
-            } catch (System.Exception ex) { throw ex; }
-        }
         private static void insertDatoS(IFeatureClass pFeatureClass, ref IFeature pFeature, string[,] elObjeto)
         {
             try
@@ -744,21 +739,29 @@ namespace featureTools
         /// <param name="queryFilter">IQueryFilter que selcciono en la capa</param>
         /// <param name="myFeature"> El IFeature del elemento a seleccionado</param> 
         /// <param name="elObjeto">Arreglo de Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
-        public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter, ref IFeature myFeature, string[,] elObjeto)
+        public static void insertDatosLayer(IMxDocument pMxDoc, string capa, IQueryFilter queryFilter,  IFeature myFeature, string[,] elObjeto)
         {
-            try {
-                IActiveView activeView =pMxDoc.ActivatedView;
+            try
+            {
+                IActiveView activeView = pMxDoc.ActivatedView;
                 ILayer olayer = returnLayerByName(pMxDoc, capa, activeView);
-                if (myFeature == null)
-                    MessageBox.Show("Feature vacio");
+                if (myFeature == null) {
+                    //MessageBox.Show("Feature vacio");
+                    throw new ArgumentException("Feature vacio");
+                }
                 startEditing(activeView.FocusMap, "Editar", olayer);
                 IFeatureClass featureClass = returnFeatureClassByName(pMxDoc, capa);
-                //IFeatureCursor searchCursor = featureClass.Search(queryFilter, false);
-                
-                if (elObjeto != null)
-                    insertDatoS(featureClass, ref myFeature, elObjeto);
+                IFeatureCursor pFeatCur = featureClass.Update(queryFilter, false);
+                IFeature pFeat = pFeatCur.NextFeature();
+                if (elObjeto != null) {
+                    insertDatoS(featureClass, ref pFeat, elObjeto);
+                    pFeatCur.UpdateFeature(pFeat);
+                    pFeat = pFeatCur.NextFeature();
+                }
+                pFeatCur = null;
                 // Stop the edit operation.
                 startEditing(activeView.FocusMap, "Terminar Guardando", olayer);
+
             } catch (System.Exception ex) { throw ex; }
         }
         /// <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
@@ -780,8 +783,8 @@ namespace featureTools
                     int fieldID = allFields.FindField(subFields[j]);
                     if (fieldID == -1)
                     {
-                        System.Windows.Forms.MessageBox.Show("EL campo " + subFields[j]+" no fue encontrado");
-                        return;
+                        throw new ArgumentException("EL campo " + subFields[j]+" no fue encontrado");
+                       // return;
                     }
                     outFieldsEdit.AddField(allFields.get_Field(fieldID));
                 }
@@ -803,7 +806,7 @@ namespace featureTools
                 );
                 IInvalidObjectInfo invalidObject = invalidObjectEnum.Next();
                 if (invalidObject != null)
-                    System.Windows.Forms.MessageBox.Show("Some or all features did not load");
+                    throw new ArgumentException("Algunos o todos los features no se cargaron");
             }
             catch (System.Exception ex) { throw ex; }
         }
@@ -832,15 +835,14 @@ namespace featureTools
                 */
                // linepart = null;
                 int elfid;
-                    elfid = createFeature(capaDestino, linepart, pMxDoc, layer, campos);
-               
+                elfid = createFeature(capaDestino, linepart, pMxDoc, layer, campos);               
                 startEditing(activeView.FocusMap, "Terminar Guardando", layer);
                 return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error: " + ex.Message + "\n" + ex.StackTrace, "copiaPoligono");
-                return false;
+                throw new ArgumentException("copiaPoligono \nError: " + ex.Message + "\n" + ex.StackTrace);
+               // return false;
             }
         }
     }

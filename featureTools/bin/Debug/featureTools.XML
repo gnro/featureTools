@@ -163,17 +163,23 @@
             <param name="fld">Nombre del campo</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
+        <member name="M:featureTools.feature.returnFieldDataSelection(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.String)">
+            <summary>Retorna un ArrayList de valores de un campo en una capa</summary>
+            <param name="layer">Nombre del layer a buscar.</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="fld">Nombre del campo</param>
+            <returns>Devuelve un ArrayList de valores.</returns>
+        </member>
         <member name="M:featureTools.feature.returnFirstFieldData(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String)">
             <summary>Retorna un string el valor de un campo de un Feature Class</summary>
             <param name="fc">Nombre del Feature a buscar.</param>
             <param name="fld">Nombre del campo</param>
             <returns>Devuelve un string del valor.</returns>
         </member>
-        <member name="M:featureTools.feature.returnDataSeleccion(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.Collections.ArrayList,System.String)">
+        <member name="M:featureTools.feature.returnData(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.Collections.ArrayList)">
             <summary>Retorna un ArrayList de valores de un campo en un Feature Class</summary>
             <param name="fc">Feature class en el que buscar.</param>
             <param name="row">Nombres de los campos</param>
-            <param name="condicionWhere">Condicion de seleccion</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
         <member name="M:featureTools.feature.returnFeatureLayers(ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Geometry.esriGeometryType)">
@@ -233,7 +239,7 @@
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
         </member>
-        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature@,System.String[0:,0:])">
+        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature,System.String[0:,0:])">
             <summary>Realza un insert nuevos datos en u l</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
