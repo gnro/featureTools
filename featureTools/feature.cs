@@ -46,7 +46,7 @@ namespace featureTools
             catch (System.Exception ex)
             {
                 throw new ArgumentException("createFeature\n Error: " + ex.Message + "\n" + ex.StackTrace );
-                return -1;
+               // return -1;
             }
         }
         /// <summary>Retorna el número de elementos seleccionados según una condición</summary>
@@ -241,7 +241,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y, ActiveView);
-            envelope.Expand(0.1, 0.1, false);
+            envelope.Expand(0.5, 0.5, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             ActiveView.Refresh();
             return myfeature;
@@ -256,7 +256,7 @@ namespace featureTools
         {
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
-            envelope.Expand(0.05, 0.05, false);
+            envelope.Expand(0.025, 0.025, false);
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
             return myfeature;
         }
@@ -379,12 +379,42 @@ namespace featureTools
             IFeature pFeature;
             ArrayList col = new ArrayList();
             pFeature = pFCursor.NextFeature();
-            while (!(pFeature == null)){
-                col.Add(pFeature.get_Value(iFldIndex));
+            while (!(pFeature == null)) {
+                object s = null;
+                s = pFeature.get_Value(iFldIndex);
+                if (s is DBNull) { 
+                    Type t =s.GetType();
+                    if (((t.Equals(typeof(int))) || (t.Equals(typeof(long)))) || (t.Equals(typeof(double))))
+                        s = 0;
+                    else
+                        s = "0";
+                }
+                col.Add(s);
                 pFeature = pFCursor.NextFeature();
             }
             pFCursor = null;
             return col;
+        }
+        /// <summary>Retorna un IFeature de valores de un campo en un Feature Class</summary>
+        /// <param name="fc">Nombre del Feature a buscar.</param>
+        /// <param name="fld">Nombre del campo</param>
+        /// <param name="dat">Dato del campo a buscar</param>
+        /// <returns>Devuelve un ArrayList de valores.</returns>
+        public static IFeature returnIFeatureSelect(IFeatureClass fc, String fld, String dat)
+        {
+            int iFldIndex = fc.Fields.FindField(fld);
+            IFeatureCursor pFCursor = fc.Search(null, false);
+            IFeature pFeature;
+            pFeature = pFCursor.NextFeature();
+            while (!(pFeature == null))
+            {
+                string s = pFeature.get_Value(iFldIndex).ToString();
+                if (s == dat)
+                    return pFeature;
+                pFeature = pFCursor.NextFeature();
+            }
+            pFCursor = null;
+            return null;
         }
         /// <summary>Retorna un ArrayList de valores de un campo en una capa</summary>
         /// <param name="layer">Nombre del layer a buscar.</param>
@@ -432,7 +462,7 @@ namespace featureTools
             catch (System.Exception ex)
             {
                 throw new ArgumentException("returnFirstFieldData \n Error: " + ex.Message + "\n" + ex.StackTrace);
-                return "-1";
+                //return "-1";
             }
         }
         /// <summary>Retorna un ArrayList de valores de un campo en un Feature Class</summary>

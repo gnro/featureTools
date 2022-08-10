@@ -163,6 +163,13 @@
             <param name="fld">Nombre del campo</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
+        <member name="M:featureTools.feature.returnIFeatureSelect(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String,System.String)">
+            <summary>Retorna un IFeature de valores de un campo en un Feature Class</summary>
+            <param name="fc">Nombre del Feature a buscar.</param>
+            <param name="fld">Nombre del campo</param>
+            <param name="dat">Dato del campo a buscar</param>
+            <returns>Devuelve un ArrayList de valores.</returns>
+        </member>
         <member name="M:featureTools.feature.returnFieldDataSelection(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.String)">
             <summary>Retorna un ArrayList de valores de un campo en una capa</summary>
             <param name="layer">Nombre del layer a buscar.</param>
