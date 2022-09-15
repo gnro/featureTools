@@ -8,14 +8,6 @@
             <summary>Proporciona herramientas básicas para trabajar con Capas</summary>
             <remarks>Realiza operaciones de consulta y cambio de propiedades de las capas en ArcMap</remarks>
         </member>
-        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.String[0:,0:])">
-            <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
-            <param name="pgeometry"> Visualizacion activa.</param>
-            <param name="pMxDoc">ArcMap.Document.</param>
-            <param name="layer">Layer a editar</param>
-            <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
-            <returns>Retorna el fid de tipo entero.</returns>
-        </member>
         <member name="M:featureTools.feature.cuentaSeleccion(System.String,ESRI.ArcGIS.Carto.ILayer)">
             <summary>Retorna el número de elementos seleccionados según una condición</summary>
             <param name="condicion">Condición para realizar la selección</param>
@@ -28,10 +20,22 @@
             <param name="pMxDoc">ArcMap.Document.</param>
             <returns>Devuelve boolean.</returns>
         </member>
-        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String)">
+        <member name="M:featureTools.feature.blink(ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Geodatabase.IFeature)">
+            <summary> Realiza un blink a un elemento en especifico </summary>
+            <param name="myfeature"> elemento a seleccionar resaltar.</param>
+            <param name="activeView"> Visualizacion activa.</param>
+        </member>
+        <member name="M:featureTools.feature.FindCommandAndExecute(ESRI.ArcGIS.Framework.IApplication,System.String,System.Byte)">
             <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
             <param name="application">Entorno de arcmap</param>
             <param name="commandName">Comando a ejecutar</param>
+            <param name="subtipo">Subtipo del comando a ejecutar</param>
+        </member>
+        <member name="M:featureTools.feature.GetEditorFromArcMap(ESRI.ArcGIS.ArcMapUI.IMxApplication,System.String)">
+            <summary>Ejecuta un comando dentro del entorno de arcmap</summary>
+            <param name="mxApplication">Entorno de arcmap</param>
+            <param name="commandName">Comando a ejecutar</param>
+            <returns>Devuelve un IEditor2.</returns>
         </member>
         <member name="M:featureTools.feature.getGrpLayerByName(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
             <summary>Retorna un IGroupLayer en base al nombre</summary>
@@ -163,11 +167,10 @@
             <param name="fld">Nombre del campo</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
-        <member name="M:featureTools.feature.returnIFeatureSelect(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String,System.String)">
+        <member name="M:featureTools.feature.returnIFeatureSelect(ESRI.ArcGIS.Geodatabase.IFeatureClass,System.String)">
             <summary>Retorna un IFeature de valores de un campo en un Feature Class</summary>
             <param name="fc">Nombre del Feature a buscar.</param>
-            <param name="fld">Nombre del campo</param>
-            <param name="dat">Dato del campo a buscar</param>
+            <param name="condicion">Nombre del campo</param>
             <returns>Devuelve un ArrayList de valores.</returns>
         </member>
         <member name="M:featureTools.feature.returnFieldDataSelection(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,System.String)">
@@ -230,23 +233,46 @@
             <param name="pElementofPolygon">Nombre de la capa</param>
             <returns>Retorna un IPolyline.</returns>
         </member>
+        <member name="M:featureTools.feature.SelectMapFeaturesByAttributeQuery(ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Carto.ILayer,System.String)">
+            <summary>Realiza una seleccion según una condición</summary>
+            <param name="condicion">Condición para realizar la selección</param>
+            <param name="layer">Layer de origen de valores.</param>
+            <param name="activeView"> Visualizacion activa.</param>
+            <returns>Retorna un IFeatureClass.</returns>
+        </member>
         <member name="M:featureTools.feature.createPolygonFromPolygon(ESRI.ArcGIS.Geometry.IGeometry)">
             <summary>Realza la conversion de polygono a polilineas</summary>        
             <param name="pElementofPolygon">Nombre de la capa</param>
             <returns>Retorna un IPolyline.</returns>
         </member>
-        <member name="M:featureTools.feature.startEditing(ESRI.ArcGIS.Carto.IMap,System.String,ESRI.ArcGIS.Carto.ILayer)">
+        <member name="M:featureTools.feature.startEditing(ESRI.ArcGIS.Carto.IMap,System.String,ESRI.ArcGIS.Carto.ILayer,ESRI.ArcGIS.ArcMapUI.IMxApplication)">
             <summary>Inicia edicion en un layer especifico</summary>
             <param name="m_mapControl">IMxDocument .FocusMap.</param>
             <param name="tipo">Opcion para la edicion</param>
             <param name="cLayer">Layer a editar</param>
+            <param name="papplication">IApplication m_application= ArcMap.Application;IMxApplication papplication = (IMxApplication)m_application;</param>
         </member>
         <member name="M:featureTools.feature.zoomToSeleccion(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String)">
             <summary>Realza un Zoom -In al elemento seleccionado dentro de la capa</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
         </member>
-        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature,System.String[0:,0:])">
+        <member name="M:featureTools.feature.createFeature(System.String,ESRI.ArcGIS.Geometry.IGeometry,ESRI.ArcGIS.ArcMapUI.IMxDocument,ESRI.ArcGIS.Carto.ILayer,System.String[0:,0:])">
+            <param name="layerName"> Nombre de la capa del elemento a seleccionar.</param>
+            <param name="pgeometry"> Visualizacion activa.</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="layer">Layer a editar</param>
+            <param name="elObjeto">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+            <returns>Retorna el fid de tipo entero.</returns>
+        </member>
+        <member name="M:featureTools.feature.copiaPoligono(ESRI.ArcGIS.Geodatabase.IFeature,System.String,ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String[0:,0:],ESRI.ArcGIS.ArcMapUI.IMxApplication)">
+            <summary> Copia y pega un elemento en un capa destino agregando los campos</summary>
+            <param name="myfeatureOrigen">feature (poligono) selecciono </param>
+            <param name="capaDestino">Layer a editar y pegar el feature</param>
+            <param name="pMxDoc">ArcMap.Document.</param>
+            <param name="campos">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
+        </member>
+        <member name="M:featureTools.feature.insertDatosLayer(ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String,ESRI.ArcGIS.Geodatabase.IQueryFilter,ESRI.ArcGIS.Geodatabase.IFeature,System.String[0:,0:],ESRI.ArcGIS.ArcMapUI.IMxApplication)">
             <summary>Realza un insert nuevos datos en u l</summary>
             <param name="pMxDoc">ArcMap.Document.</param>
             <param name="capa">Nombre de la capa</param>
@@ -260,13 +286,6 @@
             <param name="inFeatureClass">IFeatureClass origen</param>
             <param name="select">clausula para selccionar de la capa origen</param>
             <param name="campos">campos para selccionar de la capa origen</param>
-        </member>
-        <member name="M:featureTools.feature.copiaPoligono(ESRI.ArcGIS.Geodatabase.IFeature,System.String,ESRI.ArcGIS.ArcMapUI.IMxDocument,System.String[0:,0:])">
-            <summary> Copia y pega un elemento en un capa destino agregando los campos</summary>
-            <param name="myfeatureOrigen">feature (poligono) selecciono </param>
-            <param name="capaDestino">Layer a editar y pegar el feature</param>
-            <param name="pMxDoc">ArcMap.Document.</param>
-            <param name="campos">Objeto con los datos (nombre del campo,tipo de valor,valor).</param>
         </member>
     </members>
 </doc>
