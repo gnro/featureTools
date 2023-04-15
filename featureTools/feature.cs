@@ -610,7 +610,10 @@ namespace featureTools
                 throw ex;
             }
         }
-        private bool isEditing(ESRI.ArcGIS.ArcMap.Application arcMap)
+        /// <summary>Retorna un ArrayList de los valores contenidos en una columna</summary>
+        /// <param name="arcMap">ESRI.ArcGIS.ArcMap.Application.</param>
+        /// <returns> Devuelve un true si el proyecto esta en modo de edicion.</returns>
+        public static bool isEditing(ESRI.ArcGIS.ArcMap.Application arcMap)
         {
             UID editorUID = new UIDClass();
             editorUID.Value = "esriEditor.Editor";

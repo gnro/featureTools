@@ -233,6 +233,11 @@
             <param name="pElementofPolygon">Nombre de la capa</param>
             <returns>Retorna un IPolyline.</returns>
         </member>
+        <member name="M:featureTools.feature.isEditing(ESRI.ArcGIS.ArcMap.Application)">
+            <summary>Retorna un ArrayList de los valores contenidos en una columna</summary>
+            <param name="arcMap">ESRI.ArcGIS.ArcMap.Application.</param>
+            <returns> Devuelve un true si el proyecto esta en modo de edicion.</returns>
+        </member>
         <member name="M:featureTools.feature.SelectMapFeaturesByAttributeQuery(ESRI.ArcGIS.Carto.IActiveView,ESRI.ArcGIS.Carto.ILayer,System.String)">
             <summary>Realiza una seleccion según una condición</summary>
             <param name="condicion">Condición para realizar la selección</param>
