@@ -220,7 +220,6 @@ namespace featureTools
             double[] c = { centerPoint.X, centerPoint.Y };
             return c;
         }
-
         /// <summary> Retorna las coordenadas de un punto geografico en pixeles</summary>
         /// <param name="mapPoint"> El IFeature del elemento a seleccionar</param>
         /// <param name="ActiveView"> Visualizacion activa.</param>
@@ -263,7 +262,7 @@ namespace featureTools
             IFeature myfeature;
             IEnvelope envelope = selectByPoint(x, y,  ActiveView);
             envelope.Expand(0.025, 0.025, false);
-            myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
+            myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum .esriSpatialRelWithin);
             return myfeature;
         }
         /// <summary> Permiete seleccionar un elemento de tipo linea </summary>
@@ -926,6 +925,36 @@ namespace featureTools
                     throw new ArgumentException("Algunos o todos los features no se cargaron");
             }
             catch (System.Exception ex) { throw ex; }
+        }
+        /// <summary> Permiete seleccionar un elemento de tipo poligono </summary>
+        /// <param name="x"> coordenada x.</param>
+        /// <param name="y"> coordenada y.</param>
+        /// <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
+        /// <param name="ActiveView"> Visualizacion activa.</param>
+        /// <returns>Retorna un ArrayList.</returns>
+        public static ArrayList selectPolygons(int x, int y, string lacapa, IActiveView ActiveView)
+        {
+            IFeature myfeature;
+            IEnvelope envelope = selectByPoint(x, y, ActiveView);
+            envelope.Expand(0.025, 0.025, false);
+            return selectedFeatures(lacapa, ActiveView, envelope, esriSpatialRelEnum.esriSpatialRelWithin);
+
+        }
+        private static ArrayList selectedFeatures(string layerName, IActiveView activeView, IEnvelope envelope, esriSpatialRelEnum eltiporelacion)
+        {
+            IFeatureCursor featureCursor = null;
+            featureCursor = selectedFeatureCursor(layerName, activeView, envelope, eltiporelacion);
+            IFeature pFeature;
+            ArrayList col = new ArrayList();
+            pFeature = featureCursor.NextFeature();
+            while (!(pFeature == null))
+            {
+                col.Add(pFeature );
+                pFeature = featureCursor.NextFeature();
+            }
+            featureCursor = null;
+            //System.Runtime.InteropServices.Marshal.FinalReleaseComObject(featureCursor);
+            return col;
         }
     }
 }

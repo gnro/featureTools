@@ -292,5 +292,13 @@
             <param name="select">clausula para selccionar de la capa origen</param>
             <param name="campos">campos para selccionar de la capa origen</param>
         </member>
+        <member name="M:featureTools.feature.selectPolygons(System.Int32,System.Int32,System.String,ESRI.ArcGIS.Carto.IActiveView)">
+            <summary> Permiete seleccionar un elemento de tipo poligono </summary>
+            <param name="x"> coordenada x.</param>
+            <param name="y"> coordenada y.</param>
+            <param name="lacapa"> Nombre de la capa del elemento a seleccionar</param>
+            <param name="ActiveView"> Visualizacion activa.</param>
+            <returns>Retorna un ArrayList.</returns>
+        </member>
     </members>
 </doc>
