@@ -265,6 +265,36 @@ namespace featureTools
             myfeature = selectedfeature(lacapa, ActiveView, envelope, esriSpatialRelEnum .esriSpatialRelWithin);
             return myfeature;
         }
+
+
+
+
+        public static List<IFeature> returnListFeature(int x, int y,  IFeatureClass featureClass, IActiveView ActiveView)
+        {
+            double buffer = 0.0035;
+            try
+            {    IEnvelope envelope = selectByPoint(x, y, ActiveView);
+            envelope.Expand(buffer, buffer, false);
+            var geodataset = (IGeoDataset)featureClass;
+            string shapeFieldName = featureClass.ShapeFieldName;
+            ISpatialFilter spatialFilter = new SpatialFilter();
+            spatialFilter.Geometry = envelope;
+            spatialFilter.SpatialRel = esriSpatialRelEnum.esriSpatialRelCrosses;
+            spatialFilter.set_OutputSpatialReference(shapeFieldName, geodataset.SpatialReference);
+
+            IFeatureCursor featureCursor = featureClass.Search(spatialFilter, false);
+
+            var features = new List<IFeature>();
+                IFeature feature = featureCursor.NextFeature();
+                /* ILayer pLayer = pLayers.Next();
+                while 
+                */
+                while (!(feature == null))
+                { features.Add(feature); feature = featureCursor.NextFeature(); }
+                    return features;
+        }
+            catch (System.Exception ex) { throw new ArgumentException("returnListFeature \n Error: " + ex.Message + "\n" + ex.StackTrace); throw ex; }
+}
         /// <summary> Permiete seleccionar un elemento de tipo linea </summary>
         /// <param name="x"> coordenada x.</param>
         /// <param name="y"> coordenada y.</param>
